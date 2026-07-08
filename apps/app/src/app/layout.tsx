@@ -1,29 +1,27 @@
-import ClientProvider from '@/components/providers/client-provider';
-import { Toaster } from '@/components/ui/toaster';
+import '@/app/globals.css';
+import { ClientProvider } from '@/components/shared/providers/client-provider';
+import { siteConfig } from '@/config/site';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
-// Import the ClientProvider
-import './globals.css';
+import { Toaster } from '@saas-boilerplate/ui/components/sonner';
+import { TooltipProvider } from '@saas-boilerplate/ui/components/tooltip';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'BlockChain Builder bete',
-  description: 'A blockChain Builder To Create A Customized Block Chain Network',
-  icons: '../../public/logo icon white.png',
+  title: siteConfig.name,
+  description: siteConfig.description,
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ClientProvider>{children}</ClientProvider>
-        <Toaster />
+        <TooltipProvider>
+          <ClientProvider>{children}</ClientProvider>
+          <Toaster />
+        </TooltipProvider>
       </body>
     </html>
   );

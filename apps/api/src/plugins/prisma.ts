@@ -1,6 +1,7 @@
-import { prisma } from '@saas-monorepo/database';
 import { FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
+
+import { prisma } from '@saas-boilerplate/database';
 
 export declare type FastifyPrismaOptions = {};
 /**

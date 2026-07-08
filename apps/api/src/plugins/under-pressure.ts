@@ -1,4 +1,4 @@
-import underPressure, { UnderPressureOptions } from '@fastify/under-pressure';
+import underPressure from '@fastify/under-pressure';
 import fp from 'fastify-plugin';
 
 /**
@@ -6,7 +6,7 @@ import fp from 'fastify-plugin';
  *
  * @see https://github.com/fastify/under-pressure
  */
-export default fp<UnderPressureOptions>(
+export default fp(
   async (fastify) => {
     fastify.register(underPressure, {
       maxEventLoopDelay: 1000,
@@ -40,7 +40,7 @@ export default fp<UnderPressureOptions>(
         url: '/alive',
       },
 
-      healthCheck: async (fastifyInstance: { memoryUsage: () => any }) => {
+      healthCheck: async (fastifyInstance: { memoryUsage: () => object }) => {
         return {
           metrics: fastifyInstance.memoryUsage(),
         };

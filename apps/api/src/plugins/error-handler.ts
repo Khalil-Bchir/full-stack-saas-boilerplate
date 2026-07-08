@@ -1,11 +1,11 @@
-import Fastify, { FastifyErrorCodes, FastifyInstance } from 'fastify';
+import { FastifyError, FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
 
 async function setErrorHandler(fastify: FastifyInstance) {
-  fastify.setErrorHandler(function (error, request, reply) {
+  fastify.setErrorHandler(function (error: FastifyError, _request, reply) {
     fastify.log.error(error);
     reply
-      .status(error?.statusCode ?? 500)
+      .status(error.statusCode ?? 500)
       .send({ status: error.statusCode, code: error.code, message: error.message });
   });
 }

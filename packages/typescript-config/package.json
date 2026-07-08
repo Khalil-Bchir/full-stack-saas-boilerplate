@@ -1,5 +1,5 @@
 {
-  "name": "@saas-monorepo/typescript-config",
+  "name": "@saas-boilerplate/typescript-config",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",

@@ -1,0 +1,9 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["@saas-boilerplate/database#db:generate"],
+      "outputs": ["dist/**"]
+    }
+  }
+}

@@ -1,21 +1,9 @@
 import { ajvFilePlugin } from '@fastify/multipart';
-import { PrismaClient, User } from '@saas-monorepo/database';
 import ajvFormat from 'ajv-formats';
-// Require library to exit fastify process, gracefully (if possible)
 import closeWithGrace from 'close-with-grace';
 import { FastifyInstance, FastifyServerOptions, fastify } from 'fastify';
 
-interface FastifyWithAjv extends FastifyInstance {
-  ajv: {
-    customOptions: {
-      allowUnionTypes: boolean;
-      strict: boolean;
-    };
-    plugins: any[];
-  };
-}
-
-type Fastify = typeof fastify & FastifyWithAjv;
+import { PrismaClient, User } from '@saas-boilerplate/types';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -27,60 +15,62 @@ declare module 'fastify' {
   }
 }
 
-async function createServerApp(fastify: Fastify, opts: FastifyServerOptions) {
-  const app: FastifyInstance = fastify(opts);
+async function createServerApp(opts: FastifyServerOptions) {
+  const app = fastify(opts);
 
-  app.register(import('./app.js')).ready((err) => {
-    if (err) throw err;
-    app.log.info('App ready');
-  });
+  await app.register(import('./app.js'));
+  app.log.info('App ready');
 
   return app;
 }
 
-//@ts-ignore
-const app = await createServerApp(fastify, {
-  logger: {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        translateTime: 'HH:MM:ss Z',
-        ignore: 'pid,hostname',
-      },
-    },
-  },
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
+const app = await createServerApp({
+  logger: isDevelopment
+    ? {
+        transport: {
+          target: 'pino-pretty',
+          options: {
+            translateTime: 'HH:MM:ss Z',
+            ignore: 'pid,hostname',
+          },
+        },
+      }
+    : true,
   pluginTimeout: 20000,
   ajv: {
     customOptions: {
       allowUnionTypes: true,
       strict: false,
     },
-    plugins: [ajvFormat, ajvFilePlugin],
+    plugins: [ajvFormat as never, ajvFilePlugin as never],
   },
 });
 
 const closeListeners = closeWithGrace(
   {
-    // delay is the number of milliseconds for the graceful close to finish
-    delay: parseInt(process.env['FASTIFY_CLOSE_GRACE_DELAY'] as string) || 500,
+    delay: parseInt(process.env.FASTIFY_CLOSE_GRACE_DELAY ?? '500', 10),
   },
-  async function ({ signal, err, manual }) {
+  async ({ err }) => {
     if (err) {
       app.log.error(err);
     }
     await app.close();
-  } as closeWithGrace.CloseWithGraceAsyncCallback,
+  },
 );
+
 app.addHook('onClose', async () => {
   closeListeners.uninstall();
 });
 
-//server listen
-const port = process.env['SERVER_PORT'] || 8000;
-const host = process.env['SERVER_HOST'] || '0.0.0.0';
-app.listen({ host: host, port: parseInt(port as string) }, (err: any) => {
-  if (err) {
-    app.log.error(err);
-    process.exit(1);
-  }
-});
+const port = parseInt(process.env.SERVER_PORT ?? '8000', 10);
+const host = process.env.SERVER_HOST ?? '0.0.0.0';
+
+try {
+  await app.listen({ host, port });
+  app.log.info(`Server listening on ${host}:${port}`);
+} catch (err) {
+  app.log.error(err);
+  process.exit(1);
+}

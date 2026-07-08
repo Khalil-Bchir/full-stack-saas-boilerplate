@@ -1,14 +1,16 @@
 {
-  "name": "@route-genius/root",
+  "name": "@saas-boilerplate/root",
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "build:api": "turbo run build --filter=api...",
+    "build:api": "turbo run build --filter=@saas-boilerplate/api...",
     "dev": "dotenv -e .env -e .env.development -- turbo run dev",
+    "test": "dotenv -e .env -e .env.staging -- turbo run test",
+    "start": "dotenv -e .env -e .env.production -- turbo run start",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{js,jsx,cjs,mjs,ts,tsx,cts,mts,mdx,vue}\"",
     "clean": "rm -rf node_modules .turbo && turbo run clean",
-    "prepare": "husky install",
+    "prepare": "husky",
     "commitlint": "commitlint --edit",
     "commit": "git-cz",
     "db:push": "turbo run db:push",
@@ -17,26 +19,35 @@
     "db:generate": "turbo run db:generate"
   },
   "devDependencies": {
-    "@commitlint/cli": "^18.4.4",
-    "@commitlint/config-conventional": "^18.4.4",
-    "@commitlint/cz-commitlint": "^18.4.4",
-    "@commitlint/prompt-cli": "^18.4.4",
-    "@saas-monorepo/eslint-config": "workspace:*",
-    "@saas-monorepo/prettier-config": "workspace:*",
-    "@saas-monorepo/typescript-config": "workspace:*",
-    "commitizen": "^4.3.0",
-    "dotenv": "^16.3.1",
-    "dotenv-cli": "^7.3.0",
-    "husky": "^8.0.3",
-    "inquirer": "^8.2.6",
-    "lint-staged": "^15.2.0",
-    "prettier": "^3.2.1",
-    "turbo": "latest"
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
+    "@commitlint/cz-commitlint": "^21.2.0",
+    "@commitlint/prompt-cli": "^21.2.0",
+    "@saas-boilerplate/eslint-config": "workspace:*",
+    "@saas-boilerplate/prettier-config": "workspace:*",
+    "@saas-boilerplate/typescript-config": "workspace:*",
+    "commitizen": "^4.3.2",
+    "dotenv": "^17.4.2",
+    "dotenv-cli": "^11.0.0",
+    "husky": "^9.1.7",
+    "inquirer": "^12.0.0",
+    "lint-staged": "^17.0.8",
+    "prettier": "^3.9.4",
+    "turbo": "^2.8.12"
   },
   "config": {
     "commitizen": {
       "path": "@commitlint/cz-commitlint"
     }
   },
-  "packageManager": "pnpm@8.9.0"
+  "packageManager": "pnpm@10.12.4",
+  "pnpm": {
+    "overrides": {
+      "postcss": "^8.5.10",
+      "@hono/node-server": "^1.19.13"
+    },
+    "patchedDependencies": {
+      "next-themes@0.4.6": "patches/next-themes@0.4.6.patch"
+    }
+  }
 }

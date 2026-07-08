@@ -1,4 +1,4 @@
-import { PrismaClient } from '@saas-monorepo/database';
+import { PrismaClient } from '@saas-boilerplate/types';
 
 export type AbstractServiceOptions = {
   prisma: PrismaClient;

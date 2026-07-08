@@ -1,32 +1,86 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local"],
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "globalDependencies": ["**/.env.*local", "tsconfig.json"],
+  "globalEnv": ["NODE_ENV", "DATABASE_URL", "NEXT_PUBLIC_API_URL"],
   "tasks": {
     "build": {
-      "outputs": ["dist/**", "!dist/cache/**"]
+      "dependsOn": ["^build", "^db:generate"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env.production.local",
+        ".env.local",
+        ".env.production",
+        ".env"
+      ],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "../types/src/generated/**"]
     },
     "build:api": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "^db:generate"],
       "outputs": ["dist/**", "!dist/cache/**"]
     },
-    "lint": {},
-    "format": {},
+    "lint": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "eslint.config.*", ".eslintrc*"]
+    },
+    "format": {
+      "cache": false
+    },
     "clean": {
       "cache": false
     },
     "dev": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "^db:generate"],
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env.development.local",
+        ".env.local",
+        ".env.development",
+        ".env"
+      ]
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true,
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env.production.local",
+        ".env.local",
+        ".env.production",
+        ".env"
+      ]
+    },
+    "test": {
+      "dependsOn": ["^build", "^db:generate"],
+      "cache": false,
+      "persistent": true,
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env.staging.local",
+        ".env.local",
+        ".env.staging",
+        ".env"
+      ]
+    },
+    "db:generate": {
+      "cache": false,
+      "outputs": ["../types/src/generated/**"]
     },
     "db:push": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["^db:generate"]
     },
     "db:reset": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["^db:generate"]
     },
     "db:studio": {
-      "cache": false
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^db:generate"]
     }
   }
 }

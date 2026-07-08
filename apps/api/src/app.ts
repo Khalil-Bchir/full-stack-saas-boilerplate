@@ -11,38 +11,23 @@ export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPlugin
 const options: AppOptions = {};
 
 const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void> => {
-  // Place here your custom code!
+  await fastify.register(AutoLoad, {
+    dir: join(__dirname, 'plugins'),
+    options: Object.assign({ prefix: '/plugins' }, opts),
+    dirNameRoutePrefix: false,
+    forceESM: true,
+  });
+  fastify.log.info('Plugins loaded');
 
-  // Do not touch the following lines
-
-  // This loads all plugins defined in plugins
-  // those should be support plugins that are reused
-  // through your application
-  fastify
-    .register(AutoLoad, {
-      dir: join(__dirname, 'plugins'),
-      options: Object.assign({ prefix: '/plugins' }, opts),
-      dirNameRoutePrefix: false,
-      forceESM: true,
-    })
-    .ready((err) => {
-      if (err) throw err;
-      fastify.log.info('Plugins loaded');
-    });
-
-  fastify
-    .register(AutoLoad, {
-      dir: join(__dirname, 'routes'),
-      options: Object.assign({ prefix: '/api' }, opts),
-      routeParams: true,
-      autoHooks: true,
-      cascadeHooks: true,
-      forceESM: true,
-    })
-    .ready((err) => {
-      if (err) throw err;
-      fastify.log.info('Routes loaded');
-    });
+  await fastify.register(AutoLoad, {
+    dir: join(__dirname, 'routes'),
+    options: Object.assign({ prefix: '/api' }, opts),
+    routeParams: true,
+    autoHooks: true,
+    cascadeHooks: true,
+    forceESM: true,
+  });
+  fastify.log.info('Routes loaded');
 };
 
 export default app;

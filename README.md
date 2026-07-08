@@ -1,81 +1,96 @@
-# Turborepo starter
+# Full Stack SaaS Boilerplate
 
-This is an official starter Turborepo.
+A production-ready Turborepo monorepo with a Next.js frontend, Fastify API, and shared packages.
 
-## Using this example
+## Stack
 
-Run the following command:
+| Layer | Technology |
+| --- | --- |
+| Frontend | Next.js 16 (App Router, Turbopack) |
+| API | Fastify 5 |
+| Database | Prisma 7 + PostgreSQL |
+| UI | shadcn/ui + Tailwind CSS v4 |
+| Monorepo | Turborepo 2 + pnpm 10 |
 
-```sh
-npx create-turbo@latest
-```
+## Documentation
 
-## What's inside?
+**Full documentation lives in [`doc/`](./doc/README.md).**
 
-This Turborepo includes the following packages/apps:
+| Start here | Description |
+| --- | --- |
+| [Getting Started (A–Z)](./doc/setup/getting-started.md) | Clone, install, configure, and run |
+| [Environments & NODE_ENV](./doc/setup/environments-and-node-env.md) | Env files, NODE_ENV, staging/production |
+| [Environment Variables](./doc/setup/environment-variables.md) | All env vars explained |
+| [Development Workflow](./doc/setup/development.md) | Daily commands and conventions |
+| [Architecture Overview](./doc/architecture/overview.md) | System diagram and data flow |
 
-### Apps and Packages
+## Workspace packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@saas-monorepo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@saas-monorepo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@saas-monorepo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+| Package | Purpose | README |
+| --- | --- | --- |
+| `@saas-boilerplate/app` | Next.js frontend | [apps/app/README.md](./apps/app/README.md) |
+| `@saas-boilerplate/api` | Fastify REST API | [apps/api/README.md](./apps/api/README.md) |
+| `@saas-boilerplate/database` | Prisma schema, migrations, client | [packages/database/README.md](./packages/database/README.md) |
+| `@saas-boilerplate/types` | Shared Prisma-generated types | [packages/types/README.md](./packages/types/README.md) |
+| `@saas-boilerplate/ui` | Shared shadcn/ui components | [packages/ui/README.md](./packages/ui/README.md) |
+| `@saas-boilerplate/eslint-config` | Shared ESLint config | [packages/eslint-config/README.md](./packages/eslint-config/README.md) |
+| `@saas-boilerplate/prettier-config` | Shared Prettier config | [packages/prettier-config/README.md](./packages/prettier-config/README.md) |
+| `@saas-boilerplate/typescript-config` | Shared TS configs | [packages/typescript-config/README.md](./packages/typescript-config/README.md) |
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Quick start
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
+```bash
+pnpm install
+cp .env.example .env.development   # edit with your values
+pnpm db:push
 pnpm dev
 ```
 
-### Remote Caching
+- Frontend: http://localhost:3000
+- API: http://localhost:8000
 
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+See the [full setup guide](./doc/setup/getting-started.md) for Docker Postgres, secrets, and troubleshooting.
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
+## Common commands
+
+```bash
+pnpm dev              # Start all dev servers
+pnpm test             # Start app & api (staging)
+pnpm start            # Build + start app & api (production)
+pnpm build            # Build all packages
+pnpm lint             # Lint all workspaces
+pnpm db:generate      # Regenerate Prisma client
+pnpm db:push          # Push schema to database
+pnpm db:studio        # Open Prisma Studio
+pnpm format           # Prettier format
+pnpm commit           # Conventional commit (commitizen)
+```
+
+## Project structure
 
 ```
-cd my-turborepo
-npx turbo login
+├── apps/
+│   ├── app/              Next.js frontend
+│   └── api/              Fastify API
+├── packages/
+│   ├── database/         Prisma + PostgreSQL
+│   ├── types/            Generated Prisma types
+│   ├── ui/               shadcn/ui components
+│   ├── eslint-config/
+│   ├── prettier-config/
+│   └── typescript-config/
+├── doc/                  Documentation
+├── patches/              pnpm patched dependencies
+├── turbo.json
+└── pnpm-workspace.yaml
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## Requirements
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+- Node.js 20.9+ (22 recommended)
+- pnpm 10+
+- PostgreSQL (local Docker or remote)
 
-```
-npx turbo link
-```
+## License
 
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+Private — customize for your project.

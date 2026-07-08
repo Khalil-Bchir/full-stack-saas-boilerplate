@@ -5,12 +5,9 @@ node_modules
 .pnp
 .pnp.js
 
-# Local env files
-# .env
-# .env.local
-# .env.development.local
-# .env.test.local
-# .env.production.local
+# Local env files (keep .env.example tracked)
+.env*
+!.env.example
 
 # Testing
 coverage
@@ -27,6 +24,9 @@ out/
 build
 dist
 
+# Prisma generated client
+# packages/types/src/generated
+
 
 # Debug
 npm-debug.log*
@@ -37,14 +37,11 @@ yarn-error.log*
 .DS_Store
 *.pem
 
-# .containers
-# .ssh_keys
-# .env.development
-# .env.local
-# .env.staging
-# .env.production
-
-# docker-compose.yml
+.containers
+.ssh_keys
+docker-compose.yml
 
 # .ssh_keys
 # local-meta
+
+patches

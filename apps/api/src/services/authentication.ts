@@ -1,6 +1,7 @@
-import { PrismaClient } from '@saas-monorepo/database';
 import bcrypt from 'bcryptjs';
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
+
+import { PrismaClient } from '@saas-boilerplate/types';
 
 import { config } from '../config.js';
 import {

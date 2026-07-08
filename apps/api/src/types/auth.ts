@@ -1,4 +1,4 @@
-import { Prisma, User } from '@saas-monorepo/database';
+import { Prisma, User } from '@saas-boilerplate/types';
 
 export type LoginResult = {
   accessToken: string;

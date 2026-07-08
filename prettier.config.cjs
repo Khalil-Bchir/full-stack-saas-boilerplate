@@ -1,1 +1,1 @@
-module.exports = require('@saas-monorepo/prettier-config');
+module.exports = require('@saas-boilerplate/prettier-config');

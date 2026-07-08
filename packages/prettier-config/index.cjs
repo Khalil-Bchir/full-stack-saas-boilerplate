@@ -7,7 +7,7 @@ module.exports = {
   tabWidth: 2,
   trailingComma: 'all',
 
-  importOrder: ['^vue$', '<THIRD_PARTY_MODULES>', '^@route-genius/(.*)$', '^~/(.*)$', '^[./]'],
+  importOrder: ['^vue$', '<THIRD_PARTY_MODULES>', '^@saas-boilerplate/(.*)$', '^~/(.*)$', '^[./]'],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
   // !: Waiting for these to make it upstream

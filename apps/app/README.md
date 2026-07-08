@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# @saas-boilerplate/app
 
-## Getting Started
+Next.js 16 frontend for the SaaS boilerplate.
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| Item | Value |
+| --- | --- |
+| Framework | Next.js 16 (App Router, Turbopack) |
+| React | 19 |
+| State | Redux Toolkit + redux-persist |
+| UI | `@saas-boilerplate/ui` (shadcn/ui) |
+| Styling | Tailwind CSS v4 |
+| Auth guard | `src/proxy.ts` (Next.js 16 proxy convention) |
+| Default port | `3000` |
+
+## Directory structure
+
+```
+src/
+  app/
+    (auth)/              Public routes — login, register
+    (dashboard)/         Protected routes — dashboard, projects, settings
+    layout.tsx           Root layout (providers, fonts)
+    globals.css          Tailwind entry + theme tokens
+    error.tsx            Error boundary
+    not-found.tsx        404 page
+    loading.tsx          Global loading state
+  components/
+    auth/                Login/register forms
+    dashboard/           Sidebar, nav, shell, theme toggle
+    shared/              Providers, spinner
+  features/
+    auth/
+      store/             Redux auth slice
+      hooks/             Typed dispatch/selector
+      schemas.ts         Zod validation
+      types.ts           Auth types
+  lib/
+    api.ts               Axios instance (NEXT_PUBLIC_API_URL)
+    auth.ts              Cookie + sessionStorage helpers
+    store.ts             Redux store + persistor
+  config/
+    site.ts              Site metadata
+  proxy.ts               Route protection (cookie check)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script | Description |
+| --- | --- |
+| `pnpm dev` | Start dev server (loads root env files) |
+| `pnpm build` | Production build |
+| `pnpm start` | Serve production build |
+| `pnpm lint` | ESLint |
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Environment
 
-## Learn More
+Loaded via `dotenv-cli` from monorepo root env files. See [Environments & NODE_ENV](../../doc/setup/environments-and-node-env.md).
 
-To learn more about Next.js, take a look at the following resources:
+| Script | Env file loaded |
+| --- | --- |
+| `pnpm dev` | `.env` + `.env.development` |
+| `pnpm build` | `.env` + `.env.production` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Client-accessible variables must use the `NEXT_PUBLIC_` prefix:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+```
 
-## Deploy on Vercel
+## Route groups
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Group | Path | Access |
+| --- | --- | --- |
+| Auth | `/login`, `/register` | Public |
+| Dashboard | `/`, `/projects`, `/settings` | Protected (cookie) |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Conventions
+
+- Keep `app/` pages thin — compose components, delegate logic to `features/`
+- Business logic in `features/[name]/`
+- Shared UI from `@saas-boilerplate/ui`
+- Prisma types from `@saas-boilerplate/types` (types only, no DB client)
+
+## Adding shadcn components
+
+```bash
+cd apps/app
+pnpm dlx shadcn@latest add dialog checkbox
+```
+
+Installs into `packages/ui/`. See [UI System](../../doc/features/ui-system.md).
+
+## Styling
+
+Tailwind entry: `src/app/globals.css`
+
+Must include `@source '../../../../packages/ui/src'` to scan shared UI components.
+
+## Patches
+
+`next-themes@0.4.6` is patched at monorepo root for React 19 compatibility. See `patches/next-themes@0.4.6.patch`.
+
+## Related docs
+
+- [Getting Started](../../doc/setup/getting-started.md)
+- [Authentication](../../doc/features/authentication.md)
+- [UI System](../../doc/features/ui-system.md)

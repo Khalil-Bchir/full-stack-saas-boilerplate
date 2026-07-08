@@ -1,7 +1,8 @@
-import { User } from '@saas-monorepo/database';
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import jwt from 'jsonwebtoken';
+
+import { User } from '@saas-boilerplate/types';
 
 import { AuthorizationService } from '../services/authorization.js';
 

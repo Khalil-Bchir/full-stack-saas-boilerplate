@@ -1,5 +1,6 @@
-import { Prisma, PrismaClient } from '@saas-monorepo/database';
 import jwt from 'jsonwebtoken';
+
+import { Prisma, PrismaClient } from '@saas-boilerplate/types';
 
 import { AbstractServiceOptions } from '../types/services.js';
 
