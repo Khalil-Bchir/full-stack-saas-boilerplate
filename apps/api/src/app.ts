@@ -10,12 +10,15 @@ export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPlugin
 
 const options: AppOptions = {};
 
+const ignoreTestFiles = (path: string) => /\.(test|spec)\.[cm]?[jt]s$/.test(path);
+
 const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void> => {
   await fastify.register(AutoLoad, {
     dir: join(__dirname, 'plugins'),
     options: Object.assign({ prefix: '/plugins' }, opts),
     dirNameRoutePrefix: false,
     forceESM: true,
+    ignoreFilter: ignoreTestFiles,
   });
   fastify.log.info('Plugins loaded');
 
@@ -26,6 +29,7 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
     autoHooks: true,
     cascadeHooks: true,
     forceESM: true,
+    ignoreFilter: ignoreTestFiles,
   });
   fastify.log.info('Routes loaded');
 };

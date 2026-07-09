@@ -1,10 +1,9 @@
-import Fastify from 'fastify';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import healthRoutes from './actions.js';
+import { buildTestApp } from './build-test-app.js';
 
-describe('GET /health', () => {
-  const apps: ReturnType<typeof Fastify>[] = [];
+describe('GET /api/v1/health', () => {
+  const apps: Awaited<ReturnType<typeof buildTestApp>>[] = [];
 
   afterEach(async () => {
     await Promise.all(apps.map((app) => app.close()));
@@ -12,18 +11,16 @@ describe('GET /health', () => {
   });
 
   it('returns ok when database is reachable', async () => {
-    const app = Fastify({ logger: false });
-    apps.push(app);
-
-    app.decorate('prisma', {
-      $queryRaw: vi.fn().mockResolvedValue([{ '?column?': 1 }]),
+    const app = await buildTestApp({
+      prisma: {
+        $queryRaw: vi.fn().mockResolvedValue([{ '?column?': 1 }]),
+      },
     });
-
-    await app.register(healthRoutes, { prefix: '/v1' });
+    apps.push(app);
 
     const response = await app.inject({
       method: 'GET',
-      url: '/v1/health',
+      url: '/api/v1/health',
     });
 
     expect(response.statusCode).toBe(200);
@@ -34,18 +31,16 @@ describe('GET /health', () => {
   });
 
   it('propagates database errors', async () => {
-    const app = Fastify({ logger: false });
-    apps.push(app);
-
-    app.decorate('prisma', {
-      $queryRaw: vi.fn().mockRejectedValue(new Error('connection refused')),
+    const app = await buildTestApp({
+      prisma: {
+        $queryRaw: vi.fn().mockRejectedValue(new Error('connection refused')),
+      },
     });
-
-    await app.register(healthRoutes, { prefix: '/v1' });
+    apps.push(app);
 
     const response = await app.inject({
       method: 'GET',
-      url: '/v1/health',
+      url: '/api/v1/health',
     });
 
     expect(response.statusCode).toBeGreaterThanOrEqual(500);

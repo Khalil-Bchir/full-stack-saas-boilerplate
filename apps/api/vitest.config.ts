@@ -4,6 +4,12 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    exclude: ['src/routes/**'],
+    server: {
+      deps: {
+        inline: ['@fastify/autoload'],
+      },
+    },
     env: {
       NODE_ENV: 'test',
       SERVER_PORT: '8000',
