@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: saas-api
+spec:
+  rules:
+    - host: api.saas-boilerplate.io
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: saas-app
+spec:
+  rules:
+    - host: app.saas-boilerplate.io

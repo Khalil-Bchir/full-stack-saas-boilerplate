@@ -2,7 +2,29 @@
 
 Guide for building and deploying the boilerplate to staging and production.
 
-## Build artifacts
+**Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
+
+Deployment uses **GitHub Actions** (CI) + **Kubernetes + ArgoCD** (GitOps CD). Manifests live in [`deploy/`](../../deploy/README.md).
+
+## CI/CD pipeline
+
+Workflow: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
+
+| Job | Trigger | Steps |
+| --- | --- | --- |
+| **Lint, Test & Build** | Every push / PR to `main` or `staging` | `pnpm lint` → `pnpm test` → `pnpm build` |
+| **Publish Docker Images** | Push to `main` or `staging` (after CI passes) | Build & push API + App images to GHCR |
+
+### Image tags pushed by CI
+
+| Branch | Tag | SHA tag |
+| --- | --- | --- |
+| `staging` | `staging` | `<commit-sha>` |
+| `main` | `production` | `<commit-sha>` |
+
+ArgoCD deploys the `staging` / `production` tags from GHCR. Deployments use `imagePullPolicy: Always` so new image pushes are picked up on rollout.
+
+---
 
 | Package | Output | Command |
 | --- | --- | --- |
@@ -14,102 +36,169 @@ Guide for building and deploying the boilerplate to staging and production.
 Full monorepo build:
 
 ```bash
+pnpm test
 pnpm build
 ```
 
 ---
 
-## Next.js app
+## Container images
 
-### Environment
+Images are published to GitHub Container Registry:
 
-Set production env before building:
+| Image | Dockerfile |
+| --- | --- |
+| `ghcr.io/khalil-bchir/saas-boilerplate-api` | `apps/api/Dockerfile` |
+| `ghcr.io/khalil-bchir/saas-boilerplate-app` | `apps/app/Dockerfile` |
 
-```env
-NEXT_PUBLIC_API_URL=https://api.yourdomain.com/api/v1
-```
-
-The app build script loads `../../.env` + `../../.env.production`.
-
-### Vercel (recommended for frontend)
-
-1. Connect the repo to Vercel
-2. Set **Root Directory** to `apps/app`
-3. Set **Build Command**: `cd ../.. && pnpm build --filter=@saas-boilerplate/app`
-4. Add environment variables in the Vercel dashboard
-5. Deploy
-
-### Self-hosted
+### Build and push (staging)
 
 ```bash
-pnpm build --filter=@saas-boilerplate/app
-pnpm --filter @saas-boilerplate/app start
+docker login ghcr.io -u Khalil-Bchir
+docker build -t ghcr.io/khalil-bchir/saas-boilerplate-api:staging -f apps/api/Dockerfile .
+docker build -t ghcr.io/khalil-bchir/saas-boilerplate-app:staging -f apps/app/Dockerfile .
+docker push ghcr.io/khalil-bchir/saas-boilerplate-api:staging
+docker push ghcr.io/khalil-bchir/saas-boilerplate-app:staging
 ```
 
-Runs on port 3000 by default.
+### Build and push (production)
+
+```bash
+docker build -t ghcr.io/khalil-bchir/saas-boilerplate-api:production -f apps/api/Dockerfile .
+docker build -t ghcr.io/khalil-bchir/saas-boilerplate-app:production -f apps/app/Dockerfile .
+docker push ghcr.io/khalil-bchir/saas-boilerplate-api:production
+docker push ghcr.io/khalil-bchir/saas-boilerplate-app:production
+```
 
 ---
 
-## Fastify API
+## Environment files
 
-### Docker
+| File | Purpose |
+| --- | --- |
+| `.env.staging.example` | Staging template |
+| `.env.production.example` | Production template |
 
-A Dockerfile exists at `apps/api/Dockerfile`:
+Copy and use locally:
 
 ```bash
-docker build -t saas-api -f apps/api/Dockerfile .
-docker run -p 8000:8000 --env-file .env.production saas-api
+cp .env.staging.example .env.staging
+cp .env.production.example .env.production
 ```
 
-### Production start
+### Staging URLs (Kubernetes Ingress)
+
+| Service | Host |
+| --- | --- |
+| Frontend | `https://staging.saas-boilerplate.io` |
+| API | `https://api.staging.saas-boilerplate.io` |
+
+`NEXT_PUBLIC_API_URL=https://api.staging.saas-boilerplate.io/api/v1`
+
+### Production URLs (Kubernetes Ingress)
+
+| Service | Host |
+| --- | --- |
+| Frontend | `https://app.saas-boilerplate.io` |
+| API | `https://api.saas-boilerplate.io` |
+
+`NEXT_PUBLIC_API_URL=https://api.saas-boilerplate.io/api/v1`
+
+---
+
+## Kubernetes bootstrap
+
+### 1. Create secrets
+
+```bash
+chmod +x deploy/scripts/bootstrap-secrets.sh
+./deploy/scripts/bootstrap-secrets.sh saas-staging .env.staging.example
+./deploy/scripts/bootstrap-secrets.sh saas-production .env.production.example
+```
+
+### 2. Apply manifests
+
+```bash
+kubectl apply -k deploy/k8s/overlays/staging
+kubectl -n saas-staging wait --for=condition=complete job/saas-api-migrate --timeout=120s
+```
+
+Production:
+
+```bash
+kubectl apply -k deploy/k8s/overlays/production
+kubectl -n saas-production wait --for=condition=complete job/saas-api-migrate --timeout=120s
+```
+
+---
+
+## ArgoCD (GitOps)
+
+Repository URL configured in manifests:
+
+`https://github.com/Khalil-Bchir/full-stack-saas-boilerplate.git`
+
+### Install ArgoCD
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+### Bootstrap applications
+
+```bash
+kubectl apply -f deploy/argocd/projects/
+kubectl apply -f deploy/argocd/app-of-apps.yaml
+```
+
+| ArgoCD Application | Branch | Overlay |
+| --- | --- | --- |
+| `saas-staging` | `staging` | `deploy/k8s/overlays/staging` |
+| `saas-production` | `main` | `deploy/k8s/overlays/production` |
+
+See [deploy/argocd/README.md](../../deploy/argocd/README.md).
+
+---
+
+## Local production start
+
+```bash
+cp .env.production.example .env.production
+pnpm build
+pnpm start
+```
+
+API only:
 
 ```bash
 pnpm build:api
 pnpm --filter @saas-boilerplate/api start
 ```
 
-Requires compiled `dist/index.js` and `.env.production`.
+---
 
-### Database migrations on deploy
+## Database migrations
+
+Local or CI:
 
 ```bash
+pnpm --filter @saas-boilerplate/database db:migrate:staging
 pnpm --filter @saas-boilerplate/database db:migrate:prod
 ```
 
-Run this **before** or as part of your deploy pipeline.
-
----
-
-## CI/CD
-
-GitHub Actions workflow: `.github/workflows/ci-cd.yml`
-
-Current pipeline (staging branch):
-
-1. Build and push API Docker image
-2. SSH deploy to VM
-3. Run `prisma migrate deploy`
-
-Required GitHub secrets:
-
-| Secret | Purpose |
-| --- | --- |
-| `DOCKER_REGISTRY_USER` | Docker Hub username |
-| `DOCKER_REGISTRY_PASS` | Docker Hub password |
-| `TEST_KEY` | SSH private key |
-| `VM_SSH_USER` | Deploy target user |
-| `TEST_VM_IP` | Deploy target IP |
-
-Customize the workflow for your hosting provider.
+Kubernetes Job: `deploy/k8s/base/api/migration-job.yaml`
 
 ---
 
 ## Pre-deploy checklist
 
-- [ ] `ACCESS_TOKEN_SECRET` is a strong unique value
-- [ ] `COOKIE_SECRET` is set
-- [ ] `DATABASE_URL` points to production database
-- [ ] `NEXT_PUBLIC_API_URL` points to production API
-- [ ] Migrations applied (`db:migrate:prod`)
-- [ ] CORS configured for production frontend origin
-- [ ] HTTPS enabled on API and app domains
+- [ ] `pnpm test` passes
+- [ ] `pnpm build` succeeds
+- [ ] Images pushed to `ghcr.io/khalil-bchir/`
+- [ ] Secrets created in `saas-staging` / `saas-production`
+- [ ] `ACCESS_TOKEN_SECRET` and `COOKIE_SECRET` are unique per environment
+- [ ] `DATABASE_URL` points to the correct database
+- [ ] `NEXT_PUBLIC_API_URL` matches the Ingress API host
+- [ ] Migrations completed
+- [ ] ArgoCD applications are synced

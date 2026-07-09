@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: saas-boilerplate
+
+resources:
+  - namespace.yaml
+  - api/deployment.yaml
+  - api/service.yaml
+  - api/migration-job.yaml
+  - app/deployment.yaml
+  - app/service.yaml
+  - ingress.yaml
+
+commonLabels:
+  app.kubernetes.io/part-of: saas-boilerplate
+
+images:
+  - name: saas-boilerplate-api
+    newName: saas-boilerplate-api
+    newTag: latest
+  - name: saas-boilerplate-app
+    newName: saas-boilerplate-app
+    newTag: latest

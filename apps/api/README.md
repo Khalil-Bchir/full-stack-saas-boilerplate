@@ -2,6 +2,8 @@
 
 Fastify 5 REST API for the SaaS boilerplate.
 
+**Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
+
 ## Overview
 
 | Item | Value |
@@ -48,16 +50,17 @@ src/
 | Script | Description |
 | --- | --- |
 | `pnpm dev` | Start with hot reload (`tsx watch`) |
+| `pnpm stage` | Start against staging env |
+| `pnpm test` | Run unit tests (Vitest) |
 | `pnpm build` | Compile TypeScript to `dist/` |
 | `pnpm start` | Run production build |
-| `pnpm test` | Run against staging env |
 
 ## Environment
 
 | Script | Env file loaded |
 | --- | --- |
 | `pnpm dev` | `.env.development` |
-| `pnpm test` | `.env.staging` |
+| `pnpm stage` | `.env.staging` |
 | `pnpm start` | `.env.production` |
 
 See [Environments & NODE_ENV](../../doc/setup/environments-and-node-env.md) and [Environment Variables](../../doc/setup/environment-variables.md).

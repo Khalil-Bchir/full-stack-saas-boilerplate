@@ -5,9 +5,11 @@ node_modules
 .pnp
 .pnp.js
 
-# Local env files (keep .env.example tracked)
+# Local env files (keep example templates tracked)
 .env*
 !.env.example
+!.env.staging.example
+!.env.production.example
 
 # Testing
 coverage

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: saas-boilerplate
+  namespace: argocd
+spec:
+  project: saas-boilerplate
+  source:
+    repoURL: https://github.com/Khalil-Bchir/full-stack-saas-boilerplate.git
+    targetRevision: main
+    path: deploy/argocd/applications
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

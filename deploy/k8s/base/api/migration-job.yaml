@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: saas-api-migrate
+  labels:
+    app.kubernetes.io/name: saas-api
+    app.kubernetes.io/component: migration
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: saas-api
+        app.kubernetes.io/component: migration
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: saas-boilerplate-api:latest
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - cd packages/database && npx prisma migrate deploy
+          envFrom:
+            - secretRef:
+                name: saas-api-env

@@ -2,6 +2,8 @@
 
 How this monorepo selects, loads, and applies environment configuration across **development**, **staging**, and **production**.
 
+**Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
+
 > See also: [Environment Variables](./environment-variables.md) for the full variable reference.
 
 ---
@@ -63,7 +65,10 @@ Use the staging env file explicitly:
 
 ```bash
 # API against staging config
-pnpm --filter @saas-boilerplate/api test
+pnpm --filter @saas-boilerplate/api stage
+
+# All workspaces on staging
+pnpm stage
 
 # Database migrations (staging)
 pnpm --filter @saas-boilerplate/database db:migrate:staging
@@ -176,13 +181,16 @@ Root dev script loads `.env` **before** `.env.development`, so environment-speci
 
 ```json
 "dev": "dotenv -e .env -e .env.development -- turbo run dev"
+"stage": "dotenv -e .env -e .env.staging -- turbo run stage"
+"test": "turbo run test"
 ```
 
 ### App `apps/app/package.json`
 
 ```json
 "dev":   "dotenv -e ../../.env -e ../../.env.development -- next dev"
-"test":  "dotenv -e ../../.env -e ../../.env.staging -- next dev"
+"stage": "dotenv -e ../../.env -e ../../.env.staging -- next dev"
+"test":  "vitest run"
 "build": "dotenv -e ../../.env -e ../../.env.production -- next build"
 ```
 
@@ -190,7 +198,8 @@ Root dev script loads `.env` **before** `.env.development`, so environment-speci
 
 ```json
 "dev":   "dotenv -e ../../.env.development -- tsx watch src/index.ts"
-"test":  "dotenv -e ../../.env -e ../../.env.staging -- tsx watch src/index.ts"
+"stage": "dotenv -e ../../.env -e ../../.env.staging -- tsx watch src/index.ts"
+"test":  "vitest run"
 "start": "dotenv -e ../../.env.production -- node dist/index.js"
 ```
 
@@ -209,21 +218,12 @@ All `db:*` scripts load the matching env file:
 ## Setup checklist (first clone)
 
 ```bash
-# 1. Copy template
+git clone https://github.com/Khalil-Bchir/full-stack-saas-boilerplate.git
+cd full-stack-saas-boilerplate
+
 cp .env.example .env.development
-
-# 2. Set NODE_ENV and all required vars
-#    NODE_ENV must be "development"
-nano .env.development
-
-# 3. (Optional) Staging / production files
-cp .env.example .env.staging
-cp .env.example .env.production
-# Set NODE_ENV=staging / NODE_ENV=production respectively
-
-# 4. (Optional) Local secrets override
-cp .env.development .env.development.local
-# Add real secrets here — gitignored
+cp .env.staging.example .env.staging
+cp .env.production.example .env.production
 ```
 
 ---
@@ -275,9 +275,10 @@ Next.js only auto-loads `.env*` files **inside `apps/app/`**. This monorepo keep
 | I want to… | Command |
 | --- | --- |
 | Run local dev | `pnpm dev` |
-| Run staging (app + api) | `pnpm test` |
+| Run staging (app + api) | `pnpm stage` |
+| Run unit tests | `pnpm test` |
 | Run production (app + api) | `pnpm start` |
-| Run API on staging config | `pnpm --filter @saas-boilerplate/api test` |
+| Run API on staging config | `pnpm --filter @saas-boilerplate/api stage` |
 | Run API in production mode | `pnpm --filter @saas-boilerplate/api start` |
 | Build app for production | `pnpm build --filter=@saas-boilerplate/app` |
 | Push schema (dev DB) | `pnpm db:push` |

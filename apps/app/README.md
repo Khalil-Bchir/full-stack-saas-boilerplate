@@ -2,6 +2,8 @@
 
 Next.js 16 frontend for the SaaS boilerplate.
 
+**Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
+
 ## Overview
 
 | Item | Value |
@@ -50,6 +52,8 @@ src/
 | Script | Description |
 | --- | --- |
 | `pnpm dev` | Start dev server (loads root env files) |
+| `pnpm stage` | Start dev server with staging env |
+| `pnpm test` | Run unit tests (Vitest) |
 | `pnpm build` | Production build |
 | `pnpm start` | Serve production build |
 | `pnpm lint` | ESLint |
@@ -61,6 +65,7 @@ Loaded via `dotenv-cli` from monorepo root env files. See [Environments & NODE_E
 | Script | Env file loaded |
 | --- | --- |
 | `pnpm dev` | `.env` + `.env.development` |
+| `pnpm stage` | `.env` + `.env.staging` |
 | `pnpm build` | `.env` + `.env.production` |
 
 Client-accessible variables must use the `NEXT_PUBLIC_` prefix:

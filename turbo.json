@@ -53,7 +53,7 @@
         ".env"
       ]
     },
-    "test": {
+    "stage": {
       "dependsOn": ["^build", "^db:generate"],
       "cache": false,
       "persistent": true,
@@ -64,6 +64,10 @@
         ".env.staging",
         ".env"
       ]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "**/*.test.ts", "**/*.test.tsx", "vitest.config.*"]
     },
     "db:generate": {
       "cache": false,

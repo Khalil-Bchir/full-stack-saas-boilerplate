@@ -2,6 +2,9 @@
 
 Central documentation for the **Full Stack SaaS Boilerplate** monorepo.
 
+**Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)  
+**License:** [MIT](../LICENSE)
+
 ## Start here
 
 | Document | Description |
@@ -11,7 +14,8 @@ Central documentation for the **Full Stack SaaS Boilerplate** monorepo.
 | [Environment Variables](./setup/environment-variables.md) | All env vars explained per environment |
 | [Database Setup](./setup/database.md) | PostgreSQL, Prisma, migrations, and seeding |
 | [Development Workflow](./setup/development.md) | Daily dev commands, Turbo, and debugging |
-| [Deployment](./setup/deployment.md) | Build, Docker, and CI/CD |
+| [Testing](./setup/testing.md) | Unit tests with Vitest |
+| [Deployment](./setup/deployment.md) | Kubernetes, ArgoCD, and Docker |
 
 ## Feature guides
 
@@ -28,6 +32,13 @@ Central documentation for the **Full Stack SaaS Boilerplate** monorepo.
 | Document | Description |
 | --- | --- |
 | [Overview](./architecture/overview.md) | High-level system diagram and data flow |
+
+## Infrastructure
+
+| Document | Description |
+| --- | --- |
+| [Deploy README](../deploy/README.md) | Kubernetes manifests and image build |
+| [ArgoCD README](../deploy/argocd/README.md) | GitOps bootstrap |
 
 ## Package documentation
 

@@ -1,9 +1,8 @@
-import { ajvFilePlugin } from '@fastify/multipart';
-import ajvFormat from 'ajv-formats';
 import closeWithGrace from 'close-with-grace';
-import { FastifyInstance, FastifyServerOptions, fastify } from 'fastify';
 
 import { PrismaClient, User } from '@saas-boilerplate/types';
+
+import { createServerApp } from './server.js';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -13,15 +12,6 @@ declare module 'fastify' {
   interface FastifyRequest {
     loggedUser: User;
   }
-}
-
-async function createServerApp(opts: FastifyServerOptions) {
-  const app = fastify(opts);
-
-  await app.register(import('./app.js'));
-  app.log.info('App ready');
-
-  return app;
 }
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -38,14 +28,6 @@ const app = await createServerApp({
         },
       }
     : true,
-  pluginTimeout: 20000,
-  ajv: {
-    customOptions: {
-      allowUnionTypes: true,
-      strict: false,
-    },
-    plugins: [ajvFormat as never, ajvFilePlugin as never],
-  },
 });
 
 const closeListeners = closeWithGrace(

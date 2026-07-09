@@ -2,6 +2,8 @@
 
 This guide walks you through setting up the **Full Stack SaaS Boilerplate** from a fresh clone to a running local environment.
 
+**Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
+
 ## What you will have at the end
 
 - PostgreSQL running locally (Docker)
@@ -35,11 +37,9 @@ corepack prepare pnpm@10.12.4 --activate
 ## 2. Clone the repository
 
 ```bash
-git clone <your-repo-url> my-saas-app
-cd my-saas-app
+git clone https://github.com/Khalil-Bchir/full-stack-saas-boilerplate.git
+cd full-stack-saas-boilerplate
 ```
-
-Replace `<your-repo-url>` with your Git remote (GitHub, GitLab, etc.).
 
 ---
 
@@ -78,7 +78,7 @@ Verify it is running:
 docker ps | grep saas_postgres
 ```
 
-> If you already have Postgres on port 5432, change the host port (e.g. `-p 5433:5432`) and update `DATABASE_URL` accordingly.
+If port 5432 is already in use, use `-p 5433:5432` and set `DATABASE_URL` to port `5433` in the next step.
 
 ---
 
@@ -90,33 +90,33 @@ Copy the example env file:
 cp .env.example .env.development
 ```
 
-Edit `.env.development` with your local values:
+Set these values in `.env.development`:
 
 ```env
 NODE_ENV=development
 SERVER_PORT=8000
 SERVER_HOST=localhost
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/saas_db?schema=public
-ACCESS_TOKEN_SECRET=replace-with-a-long-random-string
+ACCESS_TOKEN_SECRET=dev-access-token-secret
 ACCESS_TOKEN_TTL=1d
-COOKIE_SECRET=replace-with-another-long-random-string
+COOKIE_SECRET=dev-cookie-secret
 NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
 ```
 
-Generate secrets (optional):
+Generate stronger secrets for shared environments:
 
 ```bash
-openssl rand -base64 32   # use for ACCESS_TOKEN_SECRET
-openssl rand -base64 32   # use for COOKIE_SECRET
+openssl rand -base64 32   # ACCESS_TOKEN_SECRET
+openssl rand -base64 32   # COOKIE_SECRET
 ```
 
-See [Environment Variables](./environment-variables.md) for the full reference and [Environments & NODE_ENV](./environments-and-node-env.md) for how env loading works across workspaces.
+See [Environment Variables](./environment-variables.md) for staging and production templates.
 
 ---
 
 ## 6. Sync the database schema
 
-Push the Prisma schema to your local database:
+Push the Prisma schema to the local database:
 
 ```bash
 pnpm db:push
@@ -124,13 +124,13 @@ pnpm db:push
 
 This creates the `User` table (and any other models defined in `packages/database/prisma/schema.prisma`).
 
-Optional — open Prisma Studio to inspect data:
+Open Prisma Studio:
 
 ```bash
 pnpm db:studio
 ```
 
-Optional — seed development data:
+Seed development data:
 
 ```bash
 pnpm --filter @saas-boilerplate/database db:seed:dev
@@ -152,16 +152,29 @@ Turbo runs both workspaces in parallel:
 | --- | --- | --- |
 | Next.js frontend | http://localhost:3000 | `@saas-boilerplate/app` |
 | Fastify API | http://localhost:8000 | `@saas-boilerplate/api` |
-| Swagger UI | http://localhost:8000/docs | (if enabled) |
+| API health | http://localhost:8000/api/v1/health | `@saas-boilerplate/api` |
+| Swagger UI | http://localhost:8000/docs | `@saas-boilerplate/api` |
 
 ---
 
 ## 8. Verify the setup
 
+### Run unit tests
+
+```bash
+pnpm test
+```
+
 ### API health
 
 ```bash
-curl http://localhost:8000/api/v1/common/health
+curl http://localhost:8000/api/v1/health
+```
+
+Expected response:
+
+```json
+{"status":"ok","message":"All systems operational"}
 ```
 
 ### Register a user
@@ -169,7 +182,7 @@ curl http://localhost:8000/api/v1/common/health
 ```bash
 curl -X POST http://localhost:8000/api/v1/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"name":"Demo User","email":"demo@example.com","password":"password123"}'
+  -d '{"email":"demo@example.com","password":"password123"}'
 ```
 
 ### Log in via the app
@@ -181,11 +194,21 @@ curl -X POST http://localhost:8000/api/v1/auth/register \
 
 ---
 
-## 9. Production build (optional)
+## 9. Staging locally
+
+```bash
+cp .env.staging.example .env.staging
+pnpm stage
+```
+
+---
+
+## 10. Production build
 
 Verify everything compiles:
 
 ```bash
+pnpm test
 pnpm build
 ```
 
@@ -203,11 +226,11 @@ pnpm build:api
 
 ---
 
-## 10. Common issues
+## 11. Common issues
 
 ### `pnpm install` fails on Prisma generate
 
-Ensure `DATABASE_URL` is set in `.env.development` even for generate — Prisma 7 reads config from `prisma.config.ts`.
+Ensure `DATABASE_URL` is set in `.env.development` — Prisma 7 reads config from `prisma.config.ts`.
 
 ### Port already in use
 
@@ -228,8 +251,8 @@ Restart the dev server after CSS changes.
 ### Database connection refused
 
 ```bash
-docker start saas_postgres   # if container was stopped
-docker logs saas_postgres    # check for errors
+docker start saas_postgres
+docker logs saas_postgres
 ```
 
 ### `ACCESS_TOKEN_SECRET` missing
@@ -241,6 +264,8 @@ The API will fail JWT signing. Set it in `.env.development` before starting the 
 ## Next steps
 
 - [Development Workflow](./development.md) — daily commands and conventions
+- [Testing](./testing.md) — unit test commands and structure
+- [Deployment](./deployment.md) — Kubernetes and ArgoCD
 - [Authentication](../features/authentication.md) — how auth works end-to-end
 - [UI System](../features/ui-system.md) — adding shadcn components
 - [API Architecture](../features/api-architecture.md) — adding new routes

@@ -1,11 +1,22 @@
 {
   "name": "@saas-boilerplate/root",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Khalil-Bchir/full-stack-saas-boilerplate.git"
+  },
+  "homepage": "https://github.com/Khalil-Bchir/full-stack-saas-boilerplate#readme",
+  "bugs": {
+    "url": "https://github.com/Khalil-Bchir/full-stack-saas-boilerplate/issues"
+  },
+  "author": "Khalil Bchir (https://github.com/Khalil-Bchir)",
   "scripts": {
     "build": "turbo run build",
     "build:api": "turbo run build --filter=@saas-boilerplate/api...",
     "dev": "dotenv -e .env -e .env.development -- turbo run dev",
-    "test": "dotenv -e .env -e .env.staging -- turbo run test",
+    "stage": "dotenv -e .env -e .env.staging -- turbo run stage",
+    "test": "turbo run test",
     "start": "dotenv -e .env -e .env.production -- turbo run start",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{js,jsx,cjs,mjs,ts,tsx,cts,mts,mdx,vue}\"",

@@ -2,6 +2,8 @@
 
 Day-to-day commands and conventions for working in the monorepo.
 
+**Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
+
 > For env file selection and `NODE_ENV` behavior, see [Environments & NODE_ENV](./environments-and-node-env.md).
 
 ## Root scripts
@@ -9,7 +11,8 @@ Day-to-day commands and conventions for working in the monorepo.
 | Script | Command | Description |
 | --- | --- | --- |
 | `dev` | `pnpm dev` | Start all dev servers (Turbo) |
-| `test` | `pnpm test` | Start app + API with staging config |
+| `stage` | `pnpm stage` | Start app + API with staging config |
+| `test` | `pnpm test` | Run unit tests across workspaces |
 | `start` | `pnpm start` | Build then start app + API (production) |
 | `build` | `pnpm build` | Build all packages |
 | `build:api` | `pnpm build:api` | Build API and dependencies |

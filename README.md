@@ -2,6 +2,8 @@
 
 A production-ready Turborepo monorepo with a Next.js frontend, Fastify API, and shared packages.
 
+**Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
+
 ## Stack
 
 | Layer | Technology |
@@ -11,6 +13,8 @@ A production-ready Turborepo monorepo with a Next.js frontend, Fastify API, and 
 | Database | Prisma 7 + PostgreSQL |
 | UI | shadcn/ui + Tailwind CSS v4 |
 | Monorepo | Turborepo 2 + pnpm 10 |
+| Deploy | GitHub Actions + Kubernetes + ArgoCD |
+| Tests | Vitest |
 
 ## Documentation
 
@@ -22,6 +26,8 @@ A production-ready Turborepo monorepo with a Next.js frontend, Fastify API, and 
 | [Environments & NODE_ENV](./doc/setup/environments-and-node-env.md) | Env files, NODE_ENV, staging/production |
 | [Environment Variables](./doc/setup/environment-variables.md) | All env vars explained |
 | [Development Workflow](./doc/setup/development.md) | Daily commands and conventions |
+| [Testing](./doc/setup/testing.md) | Unit tests with Vitest |
+| [Deployment](./doc/setup/deployment.md) | Kubernetes, ArgoCD, and Docker |
 | [Architecture Overview](./doc/architecture/overview.md) | System diagram and data flow |
 
 ## Workspace packages
@@ -40,14 +46,17 @@ A production-ready Turborepo monorepo with a Next.js frontend, Fastify API, and 
 ## Quick start
 
 ```bash
+git clone https://github.com/Khalil-Bchir/full-stack-saas-boilerplate.git
+cd full-stack-saas-boilerplate
 pnpm install
-cp .env.example .env.development   # edit with your values
+cp .env.example .env.development
 pnpm db:push
 pnpm dev
 ```
 
 - Frontend: http://localhost:3000
 - API: http://localhost:8000
+- API health: http://localhost:8000/api/v1/health
 
 See the [full setup guide](./doc/setup/getting-started.md) for Docker Postgres, secrets, and troubleshooting.
 
@@ -55,7 +64,8 @@ See the [full setup guide](./doc/setup/getting-started.md) for Docker Postgres, 
 
 ```bash
 pnpm dev              # Start all dev servers
-pnpm test             # Start app & api (staging)
+pnpm stage            # Start app & api (staging)
+pnpm test             # Run unit tests
 pnpm start            # Build + start app & api (production)
 pnpm build            # Build all packages
 pnpm lint             # Lint all workspaces
@@ -72,6 +82,7 @@ pnpm commit           # Conventional commit (commitizen)
 ├── apps/
 │   ├── app/              Next.js frontend
 │   └── api/              Fastify API
+├── deploy/               Kubernetes + ArgoCD manifests
 ├── packages/
 │   ├── database/         Prisma + PostgreSQL
 │   ├── types/            Generated Prisma types
@@ -93,4 +104,4 @@ pnpm commit           # Conventional commit (commitizen)
 
 ## License
 
-Private — customize for your project.
+[MIT](./LICENSE) © [Khalil Bchir](https://github.com/Khalil-Bchir)

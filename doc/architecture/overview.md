@@ -75,13 +75,35 @@ High-level system design of the Full Stack SaaS Boilerplate.
 ## Deployment topology
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Vercel    │     │  VM/Docker  │     │  PostgreSQL │
-│  (Next.js)  │────▶│  (Fastify)  │────▶│  (managed)  │
-└─────────────┘     └─────────────┘     └─────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  GitHub: Khalil-Bchir/full-stack-saas-boilerplate               │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ GitOps sync
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  ArgoCD                                                         │
+│  ├── saas-staging      (branch: staging)                        │
+│  └── saas-production   (branch: main)                           │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Kubernetes                                                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │ saas-app     │  │ saas-api     │  │ PostgreSQL           │  │
+│  │ (Next.js)    │──│ (Fastify)    │──│ (managed / in-cluster)│  │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-See [Deployment](../setup/deployment.md) for details.
+| Environment | Frontend | API |
+| --- | --- | --- |
+| Staging | `staging.saas-boilerplate.io` | `api.staging.saas-boilerplate.io` |
+| Production | `app.saas-boilerplate.io` | `api.saas-boilerplate.io` |
+
+Images: `ghcr.io/khalil-bchir/saas-boilerplate-api` and `ghcr.io/khalil-bchir/saas-boilerplate-app`
+
+See [Deployment](../setup/deployment.md) and [deploy/README.md](../../deploy/README.md).
 
 ## Extension points
 
