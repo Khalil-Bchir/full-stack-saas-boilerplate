@@ -74,7 +74,13 @@ describe('AuthenticationService', () => {
     const service = new AuthenticationService({ prisma: prisma as never });
 
     await expect(
-      service.register({ email: 'user@example.com', password: 'password123' }),
+      service.register({
+        email: 'user@example.com',
+        password: 'password123',
+        first_name: 'Test',
+        last_name: 'User',
+        name: 'Test User',
+      }),
     ).rejects.toThrow('user already exist');
   });
 });
