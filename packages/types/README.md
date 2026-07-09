@@ -2,6 +2,16 @@
 
 Shared TypeScript types generated from the Prisma schema.
 
+## Generation flow
+
+```mermaid
+flowchart LR
+    Schema[packages/database<br/>schema.prisma] -->|pnpm db:generate| Gen[src/generated/prisma]
+    Gen --> Export[src/index.ts]
+    Export --> API[apps/api]
+    Export --> DB[packages/database]
+```
+
 ## Overview
 
 This package re-exports the Prisma-generated client so all workspaces import types from one place:

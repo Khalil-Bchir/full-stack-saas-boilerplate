@@ -6,6 +6,50 @@ Day-to-day commands and conventions for working in the monorepo.
 
 > For env file selection and `NODE_ENV` behavior, see [Environments & NODE_ENV](./environments-and-node-env.md).
 
+## Daily workflow
+
+```mermaid
+flowchart TD
+    Start([Start work]) --> Branch[Create feature branch]
+    Branch --> Dev[pnpm dev]
+    Dev --> Code[Write code]
+    Code --> Test[pnpm test]
+    Test --> Lint[pnpm lint]
+    Lint --> Commit[pnpm commit]
+    Commit --> Push[git push]
+    Push --> CI[GitHub Actions CI]
+    CI -->|staging branch| StageDeploy[ArgoCD staging]
+    CI -->|main branch| ProdDeploy[ArgoCD production]
+```
+
+## Command map
+
+```mermaid
+flowchart LR
+    subgraph Dev
+        D1[pnpm dev]
+        D2[pnpm stage]
+        D3[pnpm start]
+    end
+
+    subgraph Quality
+        Q1[pnpm test]
+        Q2[pnpm lint]
+        Q3[pnpm format]
+    end
+
+    subgraph Build
+        B1[pnpm build]
+        B2[pnpm build:api]
+    end
+
+    subgraph DB
+        DB1[pnpm db:push]
+        DB2[pnpm db:studio]
+        DB3[pnpm db:generate]
+    end
+```
+
 ## Root scripts
 
 | Script | Command | Description |
@@ -35,6 +79,14 @@ pnpm --filter @saas-boilerplate/database dev
 ```
 
 ## Git hooks (Husky)
+
+```mermaid
+flowchart LR
+    Commit[git commit] --> PreCommit[pre-commit<br/>lint-staged]
+    Commit --> CommitMsg[commit-msg<br/>commitlint]
+    PreCommit --> Format[Prettier + ESLint]
+    CommitMsg --> Conv[Conventional Commits]
+```
 
 | Hook | Tool | Purpose |
 | --- | --- | --- |

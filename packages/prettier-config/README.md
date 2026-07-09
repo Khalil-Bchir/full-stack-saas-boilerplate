@@ -2,6 +2,16 @@
 
 Shared Prettier configuration for the monorepo.
 
+## Format flow
+
+```mermaid
+flowchart LR
+    Config[prettier-config] --> Root[prettier.config.cjs]
+    Root --> Format[pnpm format]
+    Root --> Staged[lint-staged pre-commit]
+    Staged --> Files[Staged files only]
+```
+
 ## Usage
 
 Reference in root `prettier.config.cjs`:

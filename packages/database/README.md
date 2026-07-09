@@ -2,6 +2,18 @@
 
 Prisma 7 database layer — schema, migrations, client, and seeding.
 
+## Data flow
+
+```mermaid
+flowchart LR
+    Schema[schema.prisma] -->|generate| Types[packages/types]
+    Schema --> Migrations[migrations/]
+    Client[client.ts] --> Types
+    Client --> PG[(PostgreSQL)]
+    API[apps/api] --> Client
+    Seed[seed/] --> Client
+```
+
 ## Overview
 
 | Item | Value |

@@ -5,6 +5,32 @@ Central documentation for the **Full Stack SaaS Boilerplate** monorepo.
 **Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)  
 **License:** [MIT](../LICENSE)
 
+## Documentation map
+
+```mermaid
+flowchart LR
+    Start([Start here]) --> GS[Getting Started]
+    GS --> Dev[Development]
+    GS --> Env[Environments]
+    GS --> DB[Database]
+
+    Dev --> Test[Testing]
+    Dev --> Deploy[Deployment]
+
+    Env --> EnvVars[Environment Variables]
+
+    Deploy --> Infra[deploy/ K8s]
+    Deploy --> Argo[deploy/ ArgoCD]
+
+    GS --> Features[Feature guides]
+    Features --> Auth[Authentication]
+    Features --> API[API Architecture]
+    Features --> UI[UI System]
+    Features --> Mono[Monorepo Workflow]
+
+    GS --> Arch[Architecture Overview]
+```
+
 ## Start here
 
 | Document | Description |

@@ -6,6 +6,23 @@ Kubernetes manifests and ArgoCD applications for GitOps deployment.
 
 This project uses **GitHub Actions** for CI and **Kubernetes + ArgoCD** for GitOps deployment.
 
+## End-to-end deploy flow
+
+```mermaid
+flowchart TD
+    Push[git push] --> GHA[GitHub Actions]
+    GHA --> Lint[lint]
+    Lint --> Test[test]
+    Test --> Build[build]
+    Build --> Images[build & push GHCR images]
+    Images --> Argo[ArgoCD detects manifest/image]
+    Argo --> K8s[Kubernetes rollout]
+    K8s --> Job[migration Job]
+    Job --> Pods[API + App pods]
+    Pods --> Ingress[Ingress]
+    Ingress --> Live[Live traffic]
+```
+
 ## CI pipeline
 
 Workflow: `.github/workflows/ci.yml`
@@ -24,6 +41,26 @@ On push to `main` or `staging` (after CI passes):
 ArgoCD then deploys the updated images to Kubernetes.
 
 ## Layout
+
+```mermaid
+flowchart TB
+    subgraph deploy
+        subgraph k8s
+            Base[base/ api app ingress]
+            Staging[overlays/staging]
+            Prod[overlays/production]
+            Base --> Staging
+            Base --> Prod
+        end
+        subgraph argocd
+            Project[projects/]
+            Apps[applications/]
+            AOA[app-of-apps.yaml]
+            Project --> AOA --> Apps
+        end
+        Scripts[scripts/bootstrap-secrets.sh]
+    end
+```
 
 ```
 deploy/

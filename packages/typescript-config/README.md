@@ -2,6 +2,19 @@
 
 Shared TypeScript configurations for all workspaces.
 
+## Config hierarchy
+
+```mermaid
+flowchart TD
+    Base[base.json] --> Next[nextjs.json]
+    Base --> Node[node.json]
+    Base --> ReactLib[react-library.json]
+    Next --> App[apps/app]
+    Node --> API[apps/api]
+    Node --> DB[packages/database]
+    ReactLib --> UI[packages/ui]
+```
+
 ## Configs
 
 | File | Extends | Used by |

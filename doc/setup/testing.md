@@ -4,6 +4,20 @@ Unit tests use [Vitest](https://vitest.dev/) in each app workspace.
 
 **Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
 
+## Test pipeline
+
+```mermaid
+flowchart TD
+    Root[pnpm test] --> Turbo[Turbo orchestration]
+    Turbo --> API["@saas-boilerplate/api<br/>Vitest Node"]
+    Turbo --> App["@saas-boilerplate/app<br/>Vitest jsdom"]
+    API --> APIBuild[^build deps]
+    App --> AppBuild[^build deps]
+    API --> APITests[authentication.test.ts<br/>health route tests]
+    App --> AppTests[schemas.test.ts<br/>auth.test.ts]
+    GHA[GitHub Actions CI] --> Root
+```
+
 ## Commands
 
 | Command | Description |
@@ -45,6 +59,12 @@ Example areas covered:
 3. Turbo caches test results when inputs are unchanged
 
 ## Staging vs tests
+
+```mermaid
+flowchart LR
+  Test[pnpm test] --> Vitest[Vitest unit tests]
+  Stage[pnpm stage] --> Staging[Run app + API<br/>with .env.staging]
+```
 
 | Command | Purpose |
 | --- | --- |

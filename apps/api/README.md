@@ -4,6 +4,22 @@ Fastify 5 REST API for the SaaS boilerplate.
 
 **Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
 
+## Request flow
+
+```mermaid
+flowchart TD
+    HTTP[HTTP Request] --> Autoload[Fastify Autoload]
+    Autoload --> Plugins[plugins/]
+    Autoload --> Routes[routes/]
+    Routes --> Auth{verifyToken?}
+    Auth -->|yes| JWT[JWT validation]
+    Auth -->|no| Handler[Route handler]
+    JWT --> Handler
+    Handler --> Service[services/]
+    Service --> Prisma[fastify.prisma]
+    Prisma --> PG[(PostgreSQL)]
+```
+
 ## Overview
 
 | Item | Value |

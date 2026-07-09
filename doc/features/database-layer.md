@@ -4,17 +4,16 @@ Prisma 7 setup, shared types, and how data flows through the monorepo.
 
 ## Data flow
 
-```
-schema.prisma
-     │
-     ▼ prisma generate
-packages/types/src/generated/prisma/
-     │
-     ├──▶ @saas-boilerplate/types  (exported types + PrismaClient)
-     │
-     └──▶ @saas-boilerplate/database (singleton client instance)
-              │
-              └──▶ @saas-boilerplate/api (via fastify.prisma plugin)
+```mermaid
+flowchart TB
+    Schema[schema.prisma] -->|prisma generate| Gen[packages/types/generated]
+    Gen --> TypesPkg["@saas-boilerplate/types"]
+    TypesPkg --> DbPkg["@saas-boilerplate/database"]
+    DbPkg -->|singleton client| API["@saas-boilerplate/api"]
+    API -->|REST only| App["@saas-boilerplate/app"]
+    DbPkg --> PG[(PostgreSQL)]
+
+    style App fill:none,stroke-dasharray: 5 5
 ```
 
 The frontend **never** connects to the database directly. All data access goes through the API.

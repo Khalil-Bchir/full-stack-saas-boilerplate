@@ -4,61 +4,70 @@ High-level system design of the Full Stack SaaS Boilerplate.
 
 ## System diagram
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                         Client (Browser)                         │
-└──────────────────────────────┬───────────────────────────────────┘
-                               │ HTTPS
-                               ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    @saas-boilerplate/app                         │
-│                    Next.js 16 (App Router)                       │
-│  ┌────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
-│  │ proxy.ts   │  │ Redux Auth   │  │ @saas-boilerplate/ui   │  │
-│  │ (routing)  │  │ (client)     │  │ (shadcn components)    │  │
-│  └────────────┘  └──────────────┘  └────────────────────────┘  │
-└──────────────────────────────┬───────────────────────────────────┘
-                               │ REST (axios)
-                               │ NEXT_PUBLIC_API_URL
-                               ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    @saas-boilerplate/api                         │
-│                    Fastify 5                                   │
-│  ┌────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
-│  │ Plugins    │  │ Services     │  │ JSON Schema Validation │  │
-│  │ (auth,cors)│  │ (auth,users) │  │ (AJV)                  │  │
-│  └────────────┘  └──────────────┘  └────────────────────────┘  │
-└──────────────────────────────┬───────────────────────────────────┘
-                               │ Prisma Client
-                               ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    @saas-boilerplate/database                    │
-│                    Prisma 7 + @prisma/adapter-pg               │
-└──────────────────────────────┬───────────────────────────────────┘
-                               │ SQL
-                               ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    PostgreSQL                                    │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Browser[Client Browser]
+
+    subgraph App["@saas-boilerplate/app — Next.js 16"]
+        Proxy[proxy.ts]
+        Redux[Redux Auth]
+        UIComp["@saas-boilerplate/ui"]
+    end
+
+    subgraph API["@saas-boilerplate/api — Fastify 5"]
+        Plugins[Plugins auth cors]
+        Services[Services auth users]
+        AJV[JSON Schema AJV]
+    end
+
+    subgraph Data["@saas-boilerplate/database"]
+        Prisma[Prisma 7 + pg adapter]
+    end
+
+    PG[(PostgreSQL)]
+
+    Browser -->|HTTPS| App
+    App -->|REST axios| API
+    Proxy --> Redux
+    App --> UIComp
+    API --> Plugins
+    Plugins --> Services
+    Services --> AJV
+    Services --> Prisma
+    Prisma --> PG
 ```
 
 ## Shared packages
 
-```
-@saas-boilerplate/types ◀── prisma generate ── schema.prisma
-@saas-boilerplate/ui    ◀── used by app (components, utils, hooks)
-@saas-boilerplate/eslint-config, prettier-config, typescript-config
+```mermaid
+flowchart LR
+    Schema[schema.prisma] -->|prisma generate| Types["@saas-boilerplate/types"]
+    Types --> Database["@saas-boilerplate/database"]
+    Types --> API["@saas-boilerplate/api"]
+    UI["@saas-boilerplate/ui"] --> App["@saas-boilerplate/app"]
+    Config["eslint / prettier / ts configs"] --> All[All workspaces]
 ```
 
 ## Request lifecycle (authenticated)
 
-1. User visits `/projects`
-2. `proxy.ts` checks `access_token` cookie → allows through
-3. Dashboard layout renders with sidebar (Redux provides user data)
-4. Component calls API via `lib/api.ts` axios instance
-5. API `verifyToken` validates JWT → attaches `loggedUser`
-6. Service queries database via Prisma → returns data
-7. Frontend renders response
+```mermaid
+sequenceDiagram
+    actor User
+    participant App as Next.js App
+    participant Proxy as proxy.ts
+    participant API as Fastify API
+    participant DB as PostgreSQL
+
+    User->>App: Visit /projects
+    App->>Proxy: Check access_token cookie
+    Proxy-->>App: Allow
+    App->>API: GET /api/v1/... (Bearer JWT)
+    API->>API: verifyToken
+    API->>DB: Prisma query
+    DB-->>API: Data
+    API-->>App: JSON response
+    App-->>User: Render dashboard
+```
 
 ## Technology choices
 
@@ -74,26 +83,24 @@ High-level system design of the Full Stack SaaS Boilerplate.
 
 ## Deployment topology
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  GitHub: Khalil-Bchir/full-stack-saas-boilerplate               │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ GitOps sync
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  ArgoCD                                                         │
-│  ├── saas-staging      (branch: staging)                        │
-│  └── saas-production   (branch: main)                           │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Kubernetes                                                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
-│  │ saas-app     │  │ saas-api     │  │ PostgreSQL           │  │
-│  │ (Next.js)    │──│ (Fastify)    │──│ (managed / in-cluster)│  │
-│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Dev[Developer] -->|git push| GH[GitHub]
+    GH -->|trigger| GHA[GitHub Actions CI]
+    GHA -->|lint test build| GHA
+    GHA -->|push images| GHCR[GHCR Container Registry]
+
+    GH -->|GitOps sync| Argo[ArgoCD]
+    Argo -->|apply manifests| K8s[Kubernetes]
+
+    GHCR -->|pull images| K8s
+    K8s --> AppPod[saas-app Pod]
+    K8s --> APIPod[saas-api Pod]
+    K8s --> MigrateJob[Migration Job]
+    APIPod --> PG[(PostgreSQL)]
+    Ingress[NGINX Ingress] --> AppPod
+    Ingress --> APIPod
+    Users[Users] --> Ingress
 ```
 
 | Environment | Frontend | API |

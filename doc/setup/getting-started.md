@@ -4,6 +4,24 @@ This guide walks you through setting up the **Full Stack SaaS Boilerplate** from
 
 **Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
 
+## Setup flow
+
+```mermaid
+flowchart TD
+    A[Clone repo] --> B[pnpm install]
+    B --> C[Start PostgreSQL Docker]
+    C --> D[cp .env.example .env.development]
+    D --> E[pnpm db:push]
+    E --> F[pnpm dev]
+    F --> G{Verify}
+    G --> H[pnpm test]
+    G --> I[curl /api/v1/health]
+    G --> J[Register & login in browser]
+    H --> K[Ready to develop]
+    I --> K
+    J --> K
+```
+
 ## What you will have at the end
 
 - PostgreSQL running locally (Docker)

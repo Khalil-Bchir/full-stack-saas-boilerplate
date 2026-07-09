@@ -2,6 +2,18 @@
 
 How styling, theming, and shadcn/ui components work across the monorepo.
 
+## Component flow
+
+```mermaid
+flowchart LR
+    CLI[shadcn CLI] -->|add component| UI["packages/ui<br/>components/ui/"]
+    UI --> App["apps/app"]
+    Globals[globals.css @source] -->|Tailwind scan| UI
+    Theme[CSS variables oklch] --> Globals
+    NextThemes[next-themes] --> App
+    Sonner[sonner Toaster] --> App
+```
+
 ## Stack
 
 | Layer | Technology |

@@ -8,6 +8,34 @@ Deployment uses **GitHub Actions** (CI) + **Kubernetes + ArgoCD** (GitOps CD). M
 
 ## CI/CD pipeline
 
+```mermaid
+flowchart LR
+    subgraph CI["GitHub Actions — every push/PR"]
+        Lint[pnpm lint]
+        Test[pnpm test]
+        Build[pnpm build]
+        Lint --> Test --> Build
+    end
+
+    subgraph CD["On push to main/staging"]
+        Docker[Build Docker images]
+        Push[Push to GHCR]
+        Docker --> Push
+    end
+
+    subgraph GitOps["ArgoCD"]
+        Sync[Sync K8s manifests]
+        Rollout[Deploy pods]
+        Migrate[Run migration Job]
+        Sync --> Migrate --> Rollout
+    end
+
+    Git[GitHub push] --> CI
+    CI -->|passes| CD
+    CD --> GitOps
+    Users[Users] --> Ingress[Ingress] --> Rollout
+```
+
 Workflow: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
 
 | Job | Trigger | Steps |

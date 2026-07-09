@@ -2,6 +2,21 @@
 
 Fastify 5 REST API design and conventions.
 
+## Request flow
+
+```mermaid
+flowchart TD
+    Client[HTTP Client] --> Fastify[Fastify Instance]
+    Fastify --> Plugins[Plugins autoload]
+    Plugins --> Routes[Routes autoload]
+    Routes --> Schema{JSON Schema?}
+    Schema -->|valid| Service[Service layer]
+    Schema -->|invalid| Error[400 Error]
+    Service --> Prisma[fastify.prisma]
+    Prisma --> DB[(PostgreSQL)]
+    Service --> Response[JSON Response]
+```
+
 ## Entry point
 
 ```
@@ -47,14 +62,29 @@ Plugins in `src/plugins/` register automatically:
 
 ## Route autoload
 
-Routes in `src/routes/` map to URL prefixes:
+```mermaid
+flowchart LR
+    subgraph Files["src/routes/"]
+        Auth[v1/auth/actions.ts]
+        Users[v1/users/actions.ts]
+        Admin[v1/admin/actions.ts]
+        Health[v1/actions.ts]
+        V2[v2/actions.ts]
+    end
 
-```
-src/routes/v1/auth/actions.ts    →  /api/v1/auth/*
-src/routes/v1/users/actions.ts   →  /api/v1/users/*
-src/routes/v1/admin/actions.ts   →  /api/v1/admin/*
-src/routes/v1/common/actions.ts  →  /api/v1/common/*
-src/routes/v2/actions.ts         →  /api/v2/*
+    subgraph URLs["/api prefix"]
+        U1["/api/v1/auth/*"]
+        U2["/api/v1/users/*"]
+        U3["/api/v1/admin/*"]
+        U4["/api/v1/health"]
+        U5["/api/v2/*"]
+    end
+
+    Auth --> U1
+    Users --> U2
+    Admin --> U3
+    Health --> U4
+    V2 --> U5
 ```
 
 ### Autohooks

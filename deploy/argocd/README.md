@@ -2,6 +2,21 @@
 
 ArgoCD watches [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate) and syncs Kubernetes manifests from `deploy/k8s/overlays/`.
 
+## GitOps flow
+
+```mermaid
+flowchart TD
+    GH[GitHub repo] -->|watch branch| Argo[ArgoCD]
+    Argo -->|staging branch| Staging[saas-staging app]
+    Argo -->|main branch| Prod[saas-production app]
+    Staging --> NS1[namespace saas-staging]
+    Prod --> NS2[namespace saas-production]
+    NS1 --> K8s1[API + App + Ingress]
+    NS2 --> K8s2[API + App + Ingress]
+    Secrets[bootstrap-secrets.sh] -.->|manual| NS1
+    Secrets -.->|manual| NS2
+```
+
 ## Install ArgoCD
 
 ```bash

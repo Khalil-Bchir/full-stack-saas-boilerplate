@@ -4,6 +4,22 @@ Next.js 16 frontend for the SaaS boilerplate.
 
 **Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
 
+## App structure
+
+```mermaid
+flowchart TB
+    subgraph Routes["App Router"]
+        Auth["(auth)/ login register"]
+        Dash["(dashboard)/ home projects settings"]
+    end
+
+    Proxy[proxy.ts cookie guard] --> Routes
+    Dash --> Features[features/auth Redux]
+    Dash --> UI["@saas-boilerplate/ui"]
+    Features --> API[lib/api.ts axios]
+    API --> Fastify[Fastify API]
+```
+
 ## Overview
 
 | Item | Value |

@@ -4,36 +4,43 @@ How Turborepo and pnpm workspaces organize this boilerplate.
 
 ## Structure
 
-```
-full-stack-saas-boilerplate/
-├── apps/
-│   ├── app/          @saas-boilerplate/app    Next.js 16 frontend
-│   └── api/          @saas-boilerplate/api    Fastify 5 REST API
-├── packages/
-│   ├── database/     @saas-boilerplate/database   Prisma + pg client
-│   ├── types/        @saas-boilerplate/types      Generated Prisma types
-│   ├── ui/           @saas-boilerplate/ui        shadcn/ui components
-│   ├── eslint-config/
-│   ├── prettier-config/
-│   └── typescript-config/
-├── doc/              Project documentation
-├── patches/          pnpm patched dependencies
-├── turbo.json        Turborepo task pipeline
-└── pnpm-workspace.yaml
+```mermaid
+flowchart TB
+    subgraph Root[Monorepo root]
+        Turbo[turbo.json]
+        PNPM[pnpm-workspace.yaml]
+    end
+
+    subgraph Apps
+        App["apps/app<br/>@saas-boilerplate/app"]
+        API["apps/api<br/>@saas-boilerplate/api"]
+    end
+
+    subgraph Packages
+        DB[database]
+        Types[types]
+        UI[ui]
+        ESLint[eslint-config]
+        Prettier[prettier-config]
+        TS[typescript-config]
+    end
+
+    Root --> Apps
+    Root --> Packages
+    App --> UI
+    API --> DB
+    API --> Types
+    DB --> Types
 ```
 
 ## Dependency graph
 
-```
-apps/app ──────▶ @saas-boilerplate/ui
-             ──▶ (no direct database dependency)
-
-apps/api ──────▶ @saas-boilerplate/database
-             ──▶ @saas-boilerplate/types
-
-packages/database ──▶ @saas-boilerplate/types (generated into)
-
-packages/ui ──▶ (peer: react, react-dom)
+```mermaid
+flowchart LR
+    App[apps/app] --> UI[packages/ui]
+    API[apps/api] --> DB[packages/database]
+    API --> Types[packages/types]
+    DB --> Types
 ```
 
 ## pnpm workspaces
@@ -51,6 +58,20 @@ All internal packages use the `@saas-boilerplate/*` scope and are linked via `wo
 ## Turborepo tasks
 
 Configured in `turbo.json`:
+
+```mermaid
+flowchart TD
+    Dev[dev] --> Build[^build]
+    Dev --> DBGen[^db:generate]
+    Build --> DBGen
+    Build --> Lint[lint]
+    Lint --> Build
+    Test[test] --> Build
+    Stage[stage] --> Build
+    Stage --> DBGen
+    Start[start] --> Build
+    DBPush[db:push] --> DBGen
+```
 
 | Task | Behavior |
 | --- | --- |

@@ -6,27 +6,60 @@ How this monorepo selects, loads, and applies environment configuration across *
 
 > See also: [Environment Variables](./environment-variables.md) for the full variable reference.
 
+## Environment command flow
+
+```mermaid
+flowchart TD
+    subgraph Commands
+        Dev[pnpm dev]
+        Stage[pnpm stage]
+        Start[pnpm start]
+        Test[pnpm test]
+    end
+
+    subgraph EnvFiles
+        ED[".env.development"]
+        ES[".env.staging"]
+        EP[".env.production"]
+    end
+
+    Dev -->|dotenv-cli| ED
+    Stage -->|dotenv-cli| ES
+    Start -->|dotenv-cli| EP
+    Test -->|vitest config| CI[CI test env vars]
+
+    ED --> App[apps/app]
+    ED --> API[apps/api]
+    ED --> DB[packages/database]
+    ES --> App
+    ES --> API
+    EP --> App
+    EP --> API
+```
+
 ---
 
 ## Core concept
 
 This boilerplate uses **explicit env files at the monorepo root**, loaded by **`dotenv-cli`** in each workspace's npm scripts. It does **not** rely on Next.js or Node to guess which file to read.
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  Monorepo root                                          │
-│  .env.example        ← template (committed)             │
-│  .env.development    ← local dev                        │
-│  .env.staging        ← staging deploy                     │
-│  .env.production     ← production deploy                  │
-│  .env.local          ← optional secrets (gitignored)      │
-└─────────────────────────────────────────────────────────┘
-         │
-         │  dotenv-cli -e ../../.env.development
-         ▼
-┌──────────────┐  ┌──────────────┐  ┌──────────────────┐
-│  apps/app    │  │  apps/api    │  │ packages/database │
-└──────────────┘  └──────────────┘  └──────────────────┘
+```mermaid
+flowchart TB
+    subgraph Root["Monorepo root"]
+        EX[".env.example"]
+        ED[".env.development"]
+        ES[".env.staging"]
+        EP[".env.production"]
+        EL[".env.local gitignored"]
+    end
+
+    EX -.->|copy| ED
+    EX -.->|copy| ES
+    EX -.->|copy| EP
+
+    Root -->|dotenv-cli| App[apps/app]
+    Root -->|dotenv-cli| API[apps/api]
+    Root -->|dotenv-cli| Database[packages/database]
 ```
 
 Each env file **must** set `NODE_ENV` to match the environment it represents:

@@ -4,17 +4,25 @@ End-to-end authentication flow between the Next.js frontend and Fastify API.
 
 ## Overview
 
-```
-┌─────────────┐     POST /auth/login      ┌─────────────┐
-│  Next.js    │ ─────────────────────────▶│  Fastify    │
-│  App        │◀───── access_token + user ─│  API        │
-└─────────────┘                           └─────────────┘
-       │                                         │
-       │  sessionStorage + cookie                │  JWT signed with
-       │  (access_token)                         │  ACCESS_TOKEN_SECRET
-       ▼                                         ▼
-  Redux store                              PostgreSQL User
-  proxy.ts (route guard)
+```mermaid
+sequenceDiagram
+    actor User
+    participant App as Next.js App
+    participant Proxy as proxy.ts
+    participant API as Fastify API
+    participant DB as PostgreSQL
+
+    User->>App: POST /login
+    App->>API: POST /api/v1/auth/login
+    API->>DB: Find user + verify bcrypt
+    API-->>App: access_token + user
+    App->>App: Redux + sessionStorage + cookie
+    User->>App: Visit /projects
+    App->>Proxy: Check cookie
+    Proxy-->>App: Allow
+    App->>API: GET /api/v1/auth/authcheck (Bearer JWT)
+    API->>API: verifyToken
+    API-->>App: user data
 ```
 
 ## Registration
@@ -53,6 +61,15 @@ Response:
 ```
 
 ### Client-side session storage
+
+```mermaid
+flowchart LR
+    Login[Successful login] --> Redux[Redux accessToken]
+    Login --> SS[sessionStorage]
+    Login --> Cookie[access_token cookie]
+    Cookie --> Proxy[proxy.ts route guard]
+    Redux --> UI[Dashboard UI]
+```
 
 On successful login (`features/auth/store/auth-slice.ts`):
 

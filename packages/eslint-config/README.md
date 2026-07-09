@@ -2,6 +2,19 @@
 
 Shared ESLint configurations for the monorepo.
 
+## Config usage
+
+```mermaid
+flowchart TD
+    Root[eslint-config package] --> Lib[library.js]
+    Root --> Next[next.js]
+    Root --> React[react-internal.js]
+    Lib --> API[apps/api packages]
+    Next --> App[apps/app]
+    React --> UI[packages/ui]
+    Husky[pre-commit lint-staged] --> Root
+```
+
 ## Configs
 
 | File | Purpose |

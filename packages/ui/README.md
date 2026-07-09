@@ -2,6 +2,16 @@
 
 Shared [shadcn/ui](https://ui.shadcn.com) component library for the monorepo.
 
+## Package flow
+
+```mermaid
+flowchart LR
+    CLI["shadcn CLI<br/>from apps/app"] --> UI[packages/ui/components/ui]
+    UI --> App[apps/app imports]
+    Globals[app/globals.css @source] -->|Tailwind v4 scan| UI
+    Radix[Radix UI primitives] --> UI
+```
+
 ## Overview
 
 | Item | Value |

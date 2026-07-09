@@ -4,6 +4,35 @@ A production-ready Turborepo monorepo with a Next.js frontend, Fastify API, and 
 
 **Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
 
+## High-level architecture
+
+```mermaid
+flowchart TB
+    subgraph Client
+        Browser[Browser]
+    end
+
+    subgraph Apps
+        App["@saas-boilerplate/app<br/>Next.js 16"]
+        API["@saas-boilerplate/api<br/>Fastify 5"]
+    end
+
+    subgraph Packages
+        UI["@saas-boilerplate/ui"]
+        DB["@saas-boilerplate/database"]
+        Types["@saas-boilerplate/types"]
+    end
+
+    PG[(PostgreSQL)]
+
+    Browser -->|HTTPS| App
+    App -->|REST| API
+    App --> UI
+    API --> DB
+    DB --> Types
+    DB --> PG
+```
+
 ## Stack
 
 | Layer | Technology |

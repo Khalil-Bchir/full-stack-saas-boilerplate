@@ -8,6 +8,27 @@ Environment files live at the **monorepo root** and are loaded via `dotenv-cli` 
 
 ## File layout
 
+```mermaid
+flowchart TB
+    subgraph Committed["Committed templates"]
+        EX[".env.example"]
+        EXS[".env.staging.example"]
+        EXP[".env.production.example"]
+    end
+
+    subgraph Local["Local runtime gitignored"]
+        ED[".env.development"]
+        ES[".env.staging"]
+        EP[".env.production"]
+        EL[".env.local"]
+    end
+
+    EX -->|cp| ED
+    EXS -->|cp| ES
+    EXP -->|cp| EP
+    EL -.->|overrides| ED
+```
+
 | File | Purpose | Committed? |
 | --- | --- | --- |
 | `.env.example` | Development template | Yes |
@@ -28,8 +49,9 @@ cp .env.production.example .env.production
 
 ### Load order (root `pnpm dev`)
 
-```
-.env → .env.development
+```mermaid
+flowchart LR
+    A[".env"] --> B[".env.development"] --> C[process.env]
 ```
 
 ---
