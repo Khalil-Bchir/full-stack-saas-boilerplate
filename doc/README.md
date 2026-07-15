@@ -14,6 +14,7 @@ flowchart LR
     GS --> Env[Environments]
     GS --> DB[Database]
 
+    Dev --> PR[PR and merge flow]
     Dev --> Test[Testing]
     Dev --> Deploy[Deployment]
 
@@ -40,6 +41,7 @@ flowchart LR
 | [Environment Variables](./setup/environment-variables.md) | All env vars explained per environment |
 | [Database Setup](./setup/database.md) | PostgreSQL, Prisma, migrations, and seeding |
 | [Development Workflow](./setup/development.md) | Daily dev commands, Turbo, and debugging |
+| [PR & merge flow](./setup/pr-and-merge-flow.md) | Feature → dev → staging → main, reviews, promotions |
 | [Testing](./setup/testing.md) | Unit tests with Vitest |
 | [Deployment](./setup/deployment.md) | Kubernetes, ArgoCD, and Docker |
 
