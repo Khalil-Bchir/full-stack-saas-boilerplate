@@ -47,10 +47,13 @@ flowchart TB
 
 ## Documentation
 
+**Team branching & merge rules:** see [CONTRIBUTING.md](./CONTRIBUTING.md).
+
 **Full documentation lives in [`doc/`](./doc/README.md).**
 
 | Start here | Description |
 | --- | --- |
+| [Contributing / social contract](./CONTRIBUTING.md) | Branching, PRs, and no-self-merge rules |
 | [Getting Started (A–Z)](./doc/setup/getting-started.md) | Clone, install, configure, and run |
 | [Environments & NODE_ENV](./doc/setup/environments-and-node-env.md) | Env files, NODE_ENV, staging/production |
 | [Environment Variables](./doc/setup/environment-variables.md) | All env vars explained |

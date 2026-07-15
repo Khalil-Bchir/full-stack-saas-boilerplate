@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, staging]
   pull_request:
-    branches: [main, staging]
+    branches: [dev, staging, main]
   workflow_dispatch:
 
 concurrency:
@@ -20,7 +20,7 @@ env:
 
 jobs:
   ci:
-    name: Lint, Test & Build
+    name: Lint, Format, Test & Build
     runs-on: ubuntu-latest
 
     env:
@@ -51,6 +51,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm exec prettier --check "**/*.{js,jsx,cjs,mjs,ts,tsx,cts,mts,mdx,vue}"
 
       - name: Lint
         run: pnpm lint
