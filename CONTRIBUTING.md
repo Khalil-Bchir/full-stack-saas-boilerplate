@@ -23,7 +23,7 @@ feature/* or fix/*  →  dev  →  staging  →  main
 2. **Never merge your own PR.** Request a review; a teammate merges after approval.
 3. **Work branches** start from the latest `dev`.
 4. **Only promotion PRs** go up the chain: `dev` → `staging`, then `staging` → `main`.
-5. Wait for **CI to pass** before asking for a merge.
+5. Verify locally (`pnpm lint`, `pnpm test`) before asking for a merge. (CI is temporarily disabled.)
 
 ## Day-to-day steps
 
@@ -73,16 +73,9 @@ When staging is verified:
 3. Reviewer merges.
 4. Confirm production looks healthy.
 
-## What CI checks on PRs
+## CI (temporarily disabled)
 
-PRs targeting `dev`, `staging`, or `main` run GitHub Actions that:
-
-- Format check (Prettier)
-- Lint (`pnpm lint`)
-- Tests (`pnpm test`)
-- Build (`pnpm build`)
-
-Pushes to `staging` and `main` additionally publish Docker images (unchanged for now).
+GitHub Actions is turned off for now (workflow file kept as `.github/workflows/ci.yml.disabled`). Rely on local checks and the PR template social contract until we re-enable it.
 
 ## Quick do / don’t
 
@@ -92,7 +85,7 @@ Pushes to `staging` and `main` additionally publish Docker images (unchanged for
 | PR into `dev` for features/fixes | Open feature PRs straight to `main` |
 | Get a teammate to merge | Click **Merge** on your own PR |
 | Link the ticket in the PR | Leave the template blank |
-| Fix CI failures before asking for merge | Bypass a red pipeline without explanation |
+| Run lint/tests locally before review | Skip local verification because CI is off |
 
 ## Need setup help?
 

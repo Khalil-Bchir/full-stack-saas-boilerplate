@@ -19,7 +19,6 @@ Confirm this PR targets the correct branch:
 ## Checklist
 
 - [ ] I have tested this locally (`pnpm lint`, `pnpm test`, and relevant manual checks)
-- [ ] CI is green (or I understand why it is not and called it out above)
 - [ ] This PR only contains changes related to the ticket / summary
 - [ ] I have requested at least one reviewer
 
