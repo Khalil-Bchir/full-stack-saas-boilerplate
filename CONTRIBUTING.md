@@ -1,6 +1,8 @@
 # Contributing
 
-This is a **free private** GitHub repo, so we cannot rely on branch protection rules. We keep the code safe with a clear social contract and CI on every pull request.
+This is a **free private** GitHub repo, so we cannot rely on branch protection rules. We keep the code safe with a clear social contract and local verification.
+
+**Full walkthrough (diagrams, promotions, GitHub UI tips):** [doc/setup/pr-and-merge-flow.md](./doc/setup/pr-and-merge-flow.md).
 
 ## Branch flow
 
