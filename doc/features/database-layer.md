@@ -12,11 +12,15 @@ flowchart TB
     DbPkg -->|singleton client| API["@saas-boilerplate/api"]
     API -->|REST only| App["@saas-boilerplate/app"]
     DbPkg --> PG[(PostgreSQL)]
+    AI["@saas-boilerplate/ai"] -->|AiJob status SQL| PG
+    API -->|enqueue| Redis[(Redis)]
+    AI -->|consume| Redis
 
     style App fill:none,stroke-dasharray: 5 5
 ```
 
-The frontend **never** connects to the database directly. All data access goes through the API.
+The frontend **never** connects to the database directly. All browser data access goes through the API.  
+The Flask AI worker updates `AiJob` rows in Postgres over SQL (not via Prisma), while Fastify remains the public product API.
 
 ## packages/database
 

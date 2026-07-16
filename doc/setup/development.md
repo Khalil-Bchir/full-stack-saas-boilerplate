@@ -32,6 +32,12 @@ flowchart LR
         D3[pnpm start]
     end
 
+    subgraph Infra["Local infra Option C"]
+        I1[pnpm infra:up]
+        I2[pnpm infra:down]
+        I3[pnpm infra:logs]
+    end
+
     subgraph Quality
         Q1[pnpm test]
         Q2[pnpm lint]
@@ -54,7 +60,12 @@ flowchart LR
 
 | Script | Command | Description |
 | --- | --- | --- |
-| `dev` | `pnpm dev` | Start all dev servers (Turbo) |
+| `dev` | `pnpm dev` | Start everything: Redis + AI (Docker) then API + Next.js |
+| `dev:web` | `pnpm dev:web` | Node apps only (skip Compose if infra already up) |
+| `infra:up` | `pnpm infra:up` | Start/rebuild Redis + AI worker only |
+| `dev:ai` | `pnpm dev:ai` | Run Flask AI on the host (needs venv + Redis) |
+| `infra:down` | `pnpm infra:down` | Stop local Redis + AI |
+| `infra:logs` | `pnpm infra:logs` | Tail Redis + AI logs |
 | `stage` | `pnpm stage` | Start app + API with staging config |
 | `test` | `pnpm test` | Run unit tests across workspaces |
 | `start` | `pnpm start` | Build then start app + API (production) |
@@ -74,8 +85,24 @@ pnpm --filter @saas-boilerplate/app dev
 # API only
 pnpm --filter @saas-boilerplate/api dev
 
+# AI worker only (requires REDIS_URL + DATABASE_URL + Python deps)
+# Prefer Docker: pnpm infra:up
+pnpm dev:ai
+# equivalent: pnpm --filter @saas-boilerplate/ai dev:local
+
 # Database package watch
 pnpm --filter @saas-boilerplate/database dev
+```
+
+Local architecture while developing:
+
+```mermaid
+flowchart LR
+    App[Next.js :3000] --> API[Fastify :8000]
+    API --> PG[(PostgreSQL)]
+    API --> Redis[(Redis :6379)]
+    AI[Flask AI :5000] --> Redis
+    AI --> PG
 ```
 
 ## Git hooks (Husky)

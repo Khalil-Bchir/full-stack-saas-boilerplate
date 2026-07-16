@@ -17,6 +17,7 @@ env:
   REGISTRY: ghcr.io
   API_IMAGE: ghcr.io/khalil-bchir/saas-boilerplate-api
   APP_IMAGE: ghcr.io/khalil-bchir/saas-boilerplate-app
+  AI_IMAGE: ghcr.io/khalil-bchir/saas-boilerplate-ai
 
 jobs:
   ci:
@@ -33,6 +34,7 @@ jobs:
       COOKIE_SECRET: ci-cookie-secret
       SERVER_PORT: '8000'
       SERVER_HOST: localhost
+      # Leave REDIS_URL unset in CI unit tests — API boots with redis=null
 
     steps:
       - name: Checkout
@@ -122,5 +124,17 @@ jobs:
           tags: |
             ${{ env.APP_IMAGE }}:${{ steps.meta.outputs.tag }}
             ${{ env.APP_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push AI image
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/ai
+          file: apps/ai/Dockerfile
+          push: true
+          tags: |
+            ${{ env.AI_IMAGE }}:${{ steps.meta.outputs.tag }}
+            ${{ env.AI_IMAGE }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

@@ -1,0 +1,27 @@
+{
+  "name": "@saas-boilerplate/ai-contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./schemas/*": "./schemas/*"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf .turbo node_modules dist",
+    "test": "node --experimental-strip-types --test src/index.test.ts"
+  },
+  "devDependencies": {
+    "@saas-boilerplate/typescript-config": "workspace:*",
+    "@types/node": "^26.1.1",
+    "typescript": "^5.9.3"
+  }
+}

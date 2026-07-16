@@ -1,6 +1,6 @@
 # Full Stack SaaS Boilerplate
 
-A production-ready Turborepo monorepo with a Next.js frontend, Fastify API, and shared packages.
+A production-ready Turborepo monorepo with a Next.js frontend, Fastify API, Flask AI worker (Option C async jobs), Redis, and shared packages.
 
 **Repository:** [github.com/Khalil-Bchir/full-stack-saas-boilerplate](https://github.com/Khalil-Bchir/full-stack-saas-boilerplate)
 
@@ -15,22 +15,30 @@ flowchart TB
     subgraph Apps
         App["@saas-boilerplate/app<br/>Next.js 16"]
         API["@saas-boilerplate/api<br/>Fastify 5"]
+        AI["@saas-boilerplate/ai<br/>Flask worker"]
     end
 
     subgraph Packages
         UI["@saas-boilerplate/ui"]
         DB["@saas-boilerplate/database"]
         Types["@saas-boilerplate/types"]
+        Contracts["@saas-boilerplate/ai-contracts"]
     end
 
     PG[(PostgreSQL)]
+    Redis[(Redis)]
 
     Browser -->|HTTPS| App
     App -->|REST| API
     App --> UI
     API --> DB
+    API -->|enqueue jobs| Redis
+    AI -->|consume jobs| Redis
+    AI --> PG
     DB --> Types
     DB --> PG
+    API --> Contracts
+    AI --> Contracts
 ```
 
 ## Stack
@@ -39,7 +47,9 @@ flowchart TB
 | --- | --- |
 | Frontend | Next.js 16 (App Router, Turbopack) |
 | API | Fastify 5 |
+| AI worker | Flask + Redis Streams (Option C) |
 | Database | Prisma 7 + PostgreSQL |
+| Queue / cache | Redis 7 |
 | UI | shadcn/ui + Tailwind CSS v4 |
 | Monorepo | Turborepo 2 + pnpm 10 |
 | Deploy | GitHub Actions + Kubernetes + ArgoCD |
@@ -62,6 +72,7 @@ flowchart TB
 | [Testing](./doc/setup/testing.md) | Unit tests with Vitest |
 | [Deployment](./doc/setup/deployment.md) | Kubernetes, ArgoCD, and Docker |
 | [Architecture Overview](./doc/architecture/overview.md) | System diagram and data flow |
+| [AI Async Jobs (Option C)](./doc/features/ai-async-jobs.md) | Redis queue, Flask worker, job APIs |
 
 ## Workspace packages
 
@@ -69,6 +80,8 @@ flowchart TB
 | --- | --- | --- |
 | `@saas-boilerplate/app` | Next.js frontend | [apps/app/README.md](./apps/app/README.md) |
 | `@saas-boilerplate/api` | Fastify REST API | [apps/api/README.md](./apps/api/README.md) |
+| `@saas-boilerplate/ai` | Flask AI worker | [apps/ai/README.md](./apps/ai/README.md) |
+| `@saas-boilerplate/ai-contracts` | Shared AI job contracts | [packages/ai-contracts/README.md](./packages/ai-contracts/README.md) |
 | `@saas-boilerplate/database` | Prisma schema, migrations, client | [packages/database/README.md](./packages/database/README.md) |
 | `@saas-boilerplate/types` | Shared Prisma-generated types | [packages/types/README.md](./packages/types/README.md) |
 | `@saas-boilerplate/ui` | Shared shadcn/ui components | [packages/ui/README.md](./packages/ui/README.md) |
@@ -84,19 +97,24 @@ cd full-stack-saas-boilerplate
 pnpm install
 cp .env.example .env.development
 pnpm db:push
-pnpm dev
+pnpm dev                 # Redis + AI (Docker) + API + Next.js
 ```
 
 - Frontend: http://localhost:3000
 - API: http://localhost:8000
 - API health: http://localhost:8000/api/v1/health
+- AI health: http://localhost:5000/health
 
-See the [full setup guide](./doc/setup/getting-started.md) for Docker Postgres, secrets, and troubleshooting.
+See the [full setup guide](./doc/setup/getting-started.md) and [AI Async Jobs](./doc/features/ai-async-jobs.md).
 
 ## Common commands
 
 ```bash
-pnpm dev              # Start all dev servers
+pnpm dev              # Start everything: Redis + AI + API + Next.js
+pnpm dev:web          # Node apps only (infra already running)
+pnpm infra:up         # Redis + AI worker only
+pnpm infra:down       # Stop Redis + AI
+pnpm infra:logs       # Tail Redis + AI logs
 pnpm stage            # Start app & api (staging)
 pnpm test             # Run unit tests
 pnpm start            # Build + start app & api (production)
@@ -114,9 +132,12 @@ pnpm commit           # Conventional commit (commitizen)
 ```
 ├── apps/
 │   ├── app/              Next.js frontend
-│   └── api/              Fastify API
+│   ├── api/              Fastify API
+│   └── ai/               Flask AI worker (Option C)
+├── compose.dev.yaml      Local Redis + AI (+ optional Postgres)
 ├── deploy/               Kubernetes + ArgoCD manifests
 ├── packages/
+│   ├── ai-contracts/     Shared AI job contracts
 │   ├── database/         Prisma + PostgreSQL
 │   ├── types/            Generated Prisma types
 │   ├── ui/               shadcn/ui components

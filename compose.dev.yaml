@@ -1,0 +1,96 @@
+# Local development infrastructure for Option C (async AI worker).
+#
+# Usage (from monorepo root):
+#   docker compose -f compose.dev.yaml up -d
+#   docker compose -f compose.dev.yaml logs -f ai
+#
+# Services:
+#   - postgres  → optional local DB (skip if you already run Postgres)
+#   - redis     → job queue + cache
+#   - ai        → Flask health API + Redis Streams worker
+#
+# Staging/production do NOT use this file — they deploy via Kubernetes/ArgoCD.
+
+name: saas-boilerplate-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: saas_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-saas_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - saas_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-saas_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: ["db"]
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: saas_redis
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - allkeys-lru
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - saas_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  ai:
+    build:
+      context: ./apps/ai
+      dockerfile: Dockerfile
+    container_name: saas_ai
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - path: .env.development
+        required: false
+    environment:
+      NODE_ENV: development
+      AI_SERVICE_HOST: 0.0.0.0
+      AI_SERVICE_PORT: 5000
+      REDIS_URL: redis://redis:6379/0
+      # Prefer host Postgres from the AI container. If you use `--profile db`, override:
+      # AI_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/saas_db?schema=public
+      DATABASE_URL: ${AI_DATABASE_URL:-postgresql://postgres:postgres@host.docker.internal:5432/saas_db?schema=public}
+      AI_STREAM_KEY: ${AI_STREAM_KEY:-ai:jobs}
+      AI_CONSUMER_GROUP: ${AI_CONSUMER_GROUP:-ai-workers}
+      AI_WORKER_CONCURRENCY: ${AI_WORKER_CONCURRENCY:-1}
+      AI_INTERNAL_TOKEN: ${AI_INTERNAL_TOKEN:-dev-ai-internal-token}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "${AI_SERVICE_PORT:-5000}:5000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  saas_postgres_data:
+  saas_redis_data:

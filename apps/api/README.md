@@ -18,7 +18,13 @@ flowchart TD
     Handler --> Service[services/]
     Service --> Prisma[fastify.prisma]
     Prisma --> PG[(PostgreSQL)]
+    Service -->|AI jobs| RedisClient[fastify.redisClient]
+    RedisClient --> Redis[(Redis Streams / cache)]
+    Redis -->|consumed by| AI["apps/ai Flask worker"]
+    AI --> PG
 ```
+
+Async AI details: [AI Async Jobs (Option C)](../../doc/features/ai-async-jobs.md).
 
 ## Overview
 
@@ -29,6 +35,8 @@ flowchart TD
 | Auth | JWT (jsonwebtoken) |
 | Database | Prisma via `@saas-boilerplate/database` |
 | Types | `@saas-boilerplate/types` |
+| AI contracts | `@saas-boilerplate/ai-contracts` |
+| Queue / cache | Redis (`REDIS_URL`) |
 | Default port | `8000` |
 
 ## Directory structure
@@ -41,6 +49,8 @@ src/
   plugins/              Fastify plugins (auto-loaded)
     authorization.ts    JWT verifyToken decorator
     prisma.ts           Database client
+    redis.ts            Redis client (queue + cache)
+    rate-limiter.ts     Shared limits when Redis is up
     cors.ts             CORS
     swagger.ts          OpenAPI docs
     error-handler.ts    Global errors
@@ -49,6 +59,7 @@ src/
     v1/
       auth/actions.ts   POST /login, /register, GET /authcheck
       users/actions.ts  User endpoints
+      ai/actions.ts     Async AI jobs (Option C)
       admin/actions.ts  Admin endpoints
       common/actions.ts Health checks
     v2/actions.ts       v2 routes
@@ -56,6 +67,8 @@ src/
     authentication.ts   Login, register, auth check
     authorization.ts    Token verification
     users.ts            User operations
+    ai-jobs.ts          Enqueue + poll AI jobs
+    ai-cache.ts         Redis result cache
   schemas/v1/           Request/response JSON schemas
   types/                TypeScript interfaces
   translation/          i18next locale files (en, ar)

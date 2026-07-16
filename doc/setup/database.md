@@ -19,10 +19,12 @@ flowchart TB
     end
 
     subgraph Consumers
-        API[apps/api]
+        API[apps/api Prisma]
+        AI[apps/ai SQL for AiJob]
     end
 
     PG[(PostgreSQL)]
+    Redis[(Redis Streams)]
 
     Schema -->|prisma generate| Generated
     Schema --> Migrations
@@ -31,6 +33,9 @@ flowchart TB
     Client --> PG
     API -->|fastify.prisma| Client
     Seed --> Client
+    API -->|create AiJob + XADD| Redis
+    AI -->|XREADGROUP| Redis
+    AI --> PG
 ```
 
 Prisma generates the client **into** `packages/types` so both API and other packages import types from one place:

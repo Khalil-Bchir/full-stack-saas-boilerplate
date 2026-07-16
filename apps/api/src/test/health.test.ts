@@ -27,6 +27,7 @@ describe('GET /api/v1/health', () => {
     expect(response.json()).toEqual({
       status: 'ok',
       message: 'All systems operational',
+      redis: 'disabled',
     });
   });
 

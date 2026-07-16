@@ -1,0 +1,26 @@
+{
+  "$id": "https://saas-boilerplate.local/schemas/ai/create-job.request.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["ANALYZE_VIDEO", "VERIFY_IDENTITY", "EMBED", "MATCH"]
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128
+    },
+    "maxAttempts": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    }
+  }
+}
