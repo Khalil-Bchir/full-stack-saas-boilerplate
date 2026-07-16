@@ -9,16 +9,19 @@ flowchart TB
     subgraph Root[Monorepo root]
         Turbo[turbo.json]
         PNPM[pnpm-workspace.yaml]
+        Compose[compose.dev.yaml]
     end
 
     subgraph Apps
         App["apps/app<br/>@saas-boilerplate/app"]
         API["apps/api<br/>@saas-boilerplate/api"]
+        AI["apps/ai<br/>@saas-boilerplate/ai"]
     end
 
     subgraph Packages
         DB[database]
         Types[types]
+        Contracts[ai-contracts]
         UI[ui]
         ESLint[eslint-config]
         Prettier[prettier-config]
@@ -30,7 +33,10 @@ flowchart TB
     App --> UI
     API --> DB
     API --> Types
+    API --> Contracts
+    AI --> Contracts
     DB --> Types
+    Compose --> AI
 ```
 
 ## Dependency graph
@@ -38,9 +44,15 @@ flowchart TB
 ```mermaid
 flowchart LR
     App[apps/app] --> UI[packages/ui]
-    API[apps/api] --> DB[packages/database]
+    App -->|REST only| API[apps/api]
+    API --> DB[packages/database]
     API --> Types[packages/types]
+    API --> Contracts[packages/ai-contracts]
+    API -->|Redis Streams| Redis[(Redis)]
+    AI[apps/ai] -->|consume| Redis
+    AI --> PG[(PostgreSQL)]
     DB --> Types
+    DB --> PG
 ```
 
 ## pnpm workspaces
@@ -86,6 +98,10 @@ flowchart TD
 - `NODE_ENV`
 - `DATABASE_URL`
 - `NEXT_PUBLIC_API_URL`
+- `REDIS_URL`
+- `AI_STREAM_KEY`
+- `AI_CONSUMER_GROUP`
+- `AI_CACHE_TTL_SECONDS`
 
 ## Package boundaries
 
@@ -93,8 +109,11 @@ flowchart TD
 | --- | --- |
 | App imports UI from `@saas-boilerplate/ui` | Shared design system |
 | App does NOT import `@saas-boilerplate/database` directly | Database access only via API |
+| App does NOT call Flask / Redis directly | AI goes through Fastify job APIs |
 | API imports types from `@saas-boilerplate/types` | Shared type safety |
 | API imports client from `@saas-boilerplate/database` | Single Prisma instance |
+| API + AI share `@saas-boilerplate/ai-contracts` | Stable job/stream contracts |
+| AI lives in `apps/ai`, not `packages/` | Deployable Python runtime, not a TS library |
 | Prisma generates into `packages/types` | One source of truth for models |
 
 ## Adding a new workspace package

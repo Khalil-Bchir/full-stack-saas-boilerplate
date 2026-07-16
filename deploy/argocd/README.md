@@ -11,8 +11,8 @@ flowchart TD
     Argo -->|main branch| Prod[saas-production app]
     Staging --> NS1[namespace saas-staging]
     Prod --> NS2[namespace saas-production]
-    NS1 --> K8s1[API + App + Ingress]
-    NS2 --> K8s2[API + App + Ingress]
+    NS1 --> K8s1[api + app + ai + redis + ingress]
+    NS2 --> K8s2[api + app + ai + redis + ingress]
     Secrets[bootstrap-secrets.sh] -.->|manual| NS1
     Secrets -.->|manual| NS2
 ```

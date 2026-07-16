@@ -59,17 +59,18 @@ A `Project` belongs to a `User`. Authenticated users can list and create their o
 pnpm install
 cp .env.example .env.development   # skip if already done
 pnpm db:push
-pnpm dev
+pnpm dev                           # Redis + AI + API + Next.js
 ```
 
 **Verify:**
 
 
-| Check          | Command / action                                    | Expected              |
-| -------------- | --------------------------------------------------- | --------------------- |
-| API health     | `curl http://localhost:8000/api/v1/health`          | `{"status":"ok",...}` |
-| Frontend       | Open [http://localhost:3000](http://localhost:3000) | App loads             |
-| Existing tests | `pnpm test`                                         | All tests pass        |
+| Check          | Command / action                                    | Expected                         |
+| -------------- | --------------------------------------------------- | -------------------------------- |
+| API health     | `curl http://localhost:8000/api/v1/health`          | `status: ok`, `redis: up`        |
+| AI health      | `curl http://localhost:5000/health`                 | `status: ok`, `redis: true`      |
+| Frontend       | Open [http://localhost:3000](http://localhost:3000) | App loads                        |
+| Existing tests | `pnpm test`                                         | All tests pass                   |
 
 
 
@@ -544,6 +545,7 @@ apps/app/src/lib/store.ts                         # Register reducer
 ## Related documentation
 
 - [Documentation index](./README.md)
+- [Practical AI Lab](./practical-ai-lab.md) — Contracts → Redis → Flask → polling UI
 - [Getting Started](./setup/getting-started.md)
 - [Development Workflow](./setup/development.md)
 - [Testing](./setup/testing.md)

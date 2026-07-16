@@ -89,6 +89,23 @@ flowchart LR
 
 > Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Never put secrets in them.
 
+### Option C — AI queue / cache / worker
+
+| Variable | Required | Description | Default |
+| --- | --- | --- | --- |
+| `REDIS_URL` | Yes (for AI jobs) | Redis connection URL | — |
+| `AI_STREAM_KEY` | No | Redis Streams key | `ai:jobs` |
+| `AI_CONSUMER_GROUP` | No | Consumer group name | `ai-workers` |
+| `AI_CACHE_TTL_SECONDS` | No | Cache TTL for EMBED/MATCH | `300` |
+| `AI_SERVICE_PORT` | No | Flask health port | `5000` |
+| `AI_ENABLE_WORKER` | No | Run worker thread in AI container | `true` |
+| `AI_WORKER_CONCURRENCY` | No | Jobs claimed per loop | `1` |
+| `AI_INTERNAL_TOKEN` | Staging/prod | Protects AI internal endpoints | — |
+| `AI_DATABASE_URL` | Local compose | DB URL seen from AI container | `host.docker.internal` DSN |
+
+Local Redis/AI: `pnpm infra:up` (`compose.dev.yaml`).  
+Staging/prod: Kubernetes Services `saas-redis` + `saas-ai` (see [AI Async Jobs](../features/ai-async-jobs.md)).
+
 ---
 
 ## Per-environment values
@@ -104,37 +121,18 @@ ACCESS_TOKEN_SECRET=dev-access-token-secret
 ACCESS_TOKEN_TTL=1d
 COOKIE_SECRET=dev-cookie-secret
 NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+REDIS_URL=redis://localhost:6379/0
+AI_STREAM_KEY=ai:jobs
+AI_CONSUMER_GROUP=ai-workers
 ```
 
 ### Staging (`.env.staging`)
 
-Copy from `.env.staging.example`:
-
-```env
-NODE_ENV=staging
-SERVER_PORT=8000
-SERVER_HOST=0.0.0.0
-DATABASE_URL=postgresql://postgres:postgres@postgres.saas-staging.svc.cluster.local:5432/saas_staging?schema=public
-ACCESS_TOKEN_SECRET=staging-access-token-secret-replace-before-deploy
-ACCESS_TOKEN_TTL=1d
-COOKIE_SECRET=staging-cookie-secret-replace-before-deploy
-NEXT_PUBLIC_API_URL=https://api.staging.saas-boilerplate.io/api/v1
-```
+Copy from `.env.staging.example` (includes in-cluster `REDIS_URL`).
 
 ### Production (`.env.production`)
 
-Copy from `.env.production.example`:
-
-```env
-NODE_ENV=production
-SERVER_PORT=8000
-SERVER_HOST=0.0.0.0
-DATABASE_URL=postgresql://postgres:postgres@postgres.saas-production.svc.cluster.local:5432/saas_production?schema=public
-ACCESS_TOKEN_SECRET=production-access-token-secret-replace-before-deploy
-ACCESS_TOKEN_TTL=1d
-COOKIE_SECRET=production-cookie-secret-replace-before-deploy
-NEXT_PUBLIC_API_URL=https://api.saas-boilerplate.io/api/v1
-```
+Copy from `.env.production.example`. Prefer a managed Redis URL in production when you need HA.
 
 ---
 
@@ -145,6 +143,10 @@ These variables are declared in `turbo.json` under `globalEnv`:
 - `NODE_ENV`
 - `DATABASE_URL`
 - `NEXT_PUBLIC_API_URL`
+- `REDIS_URL`
+- `AI_STREAM_KEY`
+- `AI_CONSUMER_GROUP`
+- `AI_CACHE_TTL_SECONDS`
 
 Changing them invalidates Turbo build caches across workspaces.
 

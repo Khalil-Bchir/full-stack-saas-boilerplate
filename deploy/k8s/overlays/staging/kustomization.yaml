@@ -22,6 +22,20 @@ patches:
       - op: replace
         path: /spec/replicas
         value: 1
+  - target:
+      kind: Deployment
+      name: saas-ai
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  - target:
+      kind: Deployment
+      name: saas-redis
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
 
 images:
   - name: saas-boilerplate-api
@@ -29,4 +43,7 @@ images:
     newTag: staging
   - name: saas-boilerplate-app
     newName: ghcr.io/khalil-bchir/saas-boilerplate-app
+    newTag: staging
+  - name: saas-boilerplate-ai
+    newName: ghcr.io/khalil-bchir/saas-boilerplate-ai
     newTag: staging

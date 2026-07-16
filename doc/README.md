@@ -26,6 +26,7 @@ flowchart LR
     GS --> Features[Feature guides]
     Features --> Auth[Authentication]
     Features --> API[API Architecture]
+    Features --> AI[AI Async Jobs]
     Features --> UI[UI System]
     Features --> Mono[Monorepo Workflow]
 
@@ -45,6 +46,13 @@ flowchart LR
 | [Testing](./setup/testing.md) | Unit tests with Vitest |
 | [Deployment](./setup/deployment.md) | Kubernetes, ArgoCD, and Docker |
 
+## Practical labs
+
+| Document | Description |
+| --- | --- |
+| [Practical Workflow Lab](./practical-workflow-lab.md) | Build a Project resource: Prisma → Fastify → Next.js |
+| [Practical AI Lab](./practical-ai-lab.md) | Add a `SUMMARIZE` job: contracts → queue → Flask → polling UI |
+
 ## Feature guides
 
 | Document | Description |
@@ -54,6 +62,7 @@ flowchart LR
 | [UI System](./features/ui-system.md) | shadcn/ui, Tailwind v4, theming, and styling |
 | [API Architecture](./features/api-architecture.md) | Fastify plugins, routes, and validation |
 | [Database Layer](./features/database-layer.md) | Prisma schema, shared types, and client usage |
+| [AI Async Jobs (Option C)](./features/ai-async-jobs.md) | Redis Streams queue, Flask worker, AiJob model |
 
 ## Architecture
 
@@ -77,6 +86,8 @@ Each workspace has its own README with package-specific details:
 | Root monorepo | `/` | [README.md](../README.md) |
 | Next.js app | `apps/app` | [apps/app/README.md](../apps/app/README.md) |
 | Fastify API | `apps/api` | [apps/api/README.md](../apps/api/README.md) |
+| AI worker | `apps/ai` | [apps/ai/README.md](../apps/ai/README.md) |
+| AI contracts | `packages/ai-contracts` | [packages/ai-contracts/README.md](../packages/ai-contracts/README.md) |
 | Database | `packages/database` | [packages/database/README.md](../packages/database/README.md) |
 | Shared types | `packages/types` | [packages/types/README.md](../packages/types/README.md) |
 | UI components | `packages/ui` | [packages/ui/README.md](../packages/ui/README.md) |

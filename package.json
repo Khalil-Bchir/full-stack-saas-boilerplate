@@ -14,7 +14,9 @@
   "scripts": {
     "build": "turbo run build",
     "build:api": "turbo run build --filter=@saas-boilerplate/api...",
-    "dev": "dotenv -e .env -e .env.development -- turbo run dev",
+    "dev": "pnpm infra:up && dotenv -e .env -e .env.development -- turbo run dev",
+    "dev:web": "dotenv -e .env -e .env.development -- turbo run dev",
+    "dev:ai": "pnpm --filter @saas-boilerplate/ai dev:local",
     "stage": "dotenv -e .env -e .env.staging -- turbo run stage",
     "test": "turbo run test",
     "start": "dotenv -e .env -e .env.production -- turbo run start",
@@ -27,7 +29,10 @@
     "db:push": "turbo run db:push",
     "db:reset": "turbo run db:reset",
     "db:studio": "turbo run db:studio",
-    "db:generate": "turbo run db:generate"
+    "db:generate": "turbo run db:generate",
+    "infra:up": "docker compose -f compose.dev.yaml up -d --build redis ai",
+    "infra:down": "docker compose -f compose.dev.yaml down",
+    "infra:logs": "docker compose -f compose.dev.yaml logs -f redis ai"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.1",

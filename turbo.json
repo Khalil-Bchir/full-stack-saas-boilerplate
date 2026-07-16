@@ -2,7 +2,15 @@
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
   "globalDependencies": ["**/.env.*local", "tsconfig.json"],
-  "globalEnv": ["NODE_ENV", "DATABASE_URL", "NEXT_PUBLIC_API_URL"],
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "NEXT_PUBLIC_API_URL",
+    "REDIS_URL",
+    "AI_STREAM_KEY",
+    "AI_CONSUMER_GROUP",
+    "AI_CACHE_TTL_SECONDS"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "^db:generate"],

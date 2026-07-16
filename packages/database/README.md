@@ -12,7 +12,10 @@ flowchart LR
     Client --> PG[(PostgreSQL)]
     API[apps/api] --> Client
     Seed[seed/] --> Client
+    AI[apps/ai worker] -->|SQL status updates| PG
 ```
+
+`AiJob` rows are created by Fastify and updated by the Flask worker. See [AI Async Jobs](../../doc/features/ai-async-jobs.md).
 
 ## Overview
 

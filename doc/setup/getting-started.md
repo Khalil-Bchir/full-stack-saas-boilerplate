@@ -9,26 +9,30 @@ This guide walks you through setting up the **Full Stack SaaS Boilerplate** from
 ```mermaid
 flowchart TD
     A[Clone repo] --> B[pnpm install]
-    B --> C[Start PostgreSQL Docker]
-    C --> D[cp .env.example .env.development]
-    D --> E[pnpm db:push]
-    E --> F[pnpm dev]
+    B --> C[cp .env.example .env.development]
+    C --> D[Start PostgreSQL]
+    D --> E[pnpm db:push / migrate]
+    E --> F[pnpm dev<br/>Redis + AI + API + Next.js]
     F --> G{Verify}
     G --> H[pnpm test]
     G --> I[curl /api/v1/health]
-    G --> J[Register & login in browser]
-    H --> K[Ready to develop]
-    I --> K
-    J --> K
+    G --> J[curl AI /health]
+    G --> K[Register & login in browser]
+    H --> L[Ready to develop]
+    I --> L
+    J --> L
+    K --> L
 ```
 
 ## What you will have at the end
 
 - PostgreSQL running locally (Docker)
+- Redis + Flask AI worker via `compose.dev.yaml`
 - Fastify API on `http://localhost:8000`
 - Next.js app on `http://localhost:3000`
-- Prisma schema synced to the database
-- Ability to register, log in, and access the dashboard
+- AI health on `http://localhost:5000/health`
+- Prisma schema synced (including `AiJob`)
+- Ability to register, log in, enqueue AI jobs, and access the dashboard
 
 ---
 
@@ -77,9 +81,20 @@ This will:
 
 ---
 
-## 4. Start PostgreSQL (Docker)
+## 4. Start PostgreSQL + Redis + AI (Docker)
 
-Create and run a local Postgres container:
+### Option A — compose (recommended)
+
+Redis + AI also start automatically with `pnpm dev`. To start them alone:
+
+```bash
+pnpm infra:up
+
+# Optional Postgres via compose profile
+docker compose -f compose.dev.yaml --profile db up -d postgres
+```
+
+### Option B — Postgres only (legacy)
 
 ```bash
 docker run --name saas_postgres \
@@ -90,10 +105,10 @@ docker run --name saas_postgres \
   -d postgres:16-alpine
 ```
 
-Verify it is running:
+Verify:
 
 ```bash
-docker ps | grep saas_postgres
+docker ps | grep -E 'saas_postgres|saas_redis|saas_ai'
 ```
 
 If port 5432 is already in use, use `-p 5433:5432` and set `DATABASE_URL` to port `5433` in the next step.
@@ -108,7 +123,7 @@ Copy the example env file:
 cp .env.example .env.development
 ```
 
-Set these values in `.env.development`:
+Set these values in `.env.development` (Redis/AI defaults are already in `.env.example`):
 
 ```env
 NODE_ENV=development
@@ -119,6 +134,7 @@ ACCESS_TOKEN_SECRET=dev-access-token-secret
 ACCESS_TOKEN_TTL=1d
 COOKIE_SECRET=dev-cookie-secret
 NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+REDIS_URL=redis://localhost:6379/0
 ```
 
 Generate stronger secrets for shared environments:
@@ -156,7 +172,7 @@ pnpm --filter @saas-boilerplate/database db:seed:dev
 
 ---
 
-## 7. Start development servers
+## 7. Start everything
 
 From the monorepo root:
 
@@ -164,14 +180,21 @@ From the monorepo root:
 pnpm dev
 ```
 
-Turbo runs both workspaces in parallel:
+This runs `infra:up` first (Redis + Flask AI via Docker), then Turbo for the Node apps:
 
-| Service | URL | Package |
+| Service | URL | How it starts |
 | --- | --- | --- |
-| Next.js frontend | http://localhost:3000 | `@saas-boilerplate/app` |
-| Fastify API | http://localhost:8000 | `@saas-boilerplate/api` |
-| API health | http://localhost:8000/api/v1/health | `@saas-boilerplate/api` |
-| Swagger UI | http://localhost:8000/docs | `@saas-boilerplate/api` |
+| Redis | `localhost:6379` | `compose.dev.yaml` |
+| Flask AI worker | http://localhost:5000 | `compose.dev.yaml` |
+| Next.js frontend | http://localhost:3000 | Turbo `@saas-boilerplate/app` |
+| Fastify API | http://localhost:8000 | Turbo `@saas-boilerplate/api` |
+| API health | http://localhost:8000/api/v1/health | — |
+| Swagger UI | http://localhost:8000/docs | — |
+| AI health | http://localhost:5000/health | — |
+
+Node-only (infra already up): `pnpm dev:web`  
+Stop Redis/AI: `pnpm infra:down`  
+AI logs: `pnpm infra:logs`
 
 ---
 
