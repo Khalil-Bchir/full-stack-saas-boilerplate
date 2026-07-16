@@ -18,7 +18,12 @@ flowchart TB
     Dash --> UI["@saas-boilerplate/ui"]
     Features --> API[lib/api.ts axios]
     API --> Fastify[Fastify API]
+    Fastify -->|product data| PG[(PostgreSQL)]
+    Fastify -->|AI jobs only| Redis[(Redis)]
+    Redis --> AI[Flask AI worker]
 ```
+
+The frontend talks **only** to Fastify. It never calls Redis or the Flask AI service directly.
 
 ## Overview
 

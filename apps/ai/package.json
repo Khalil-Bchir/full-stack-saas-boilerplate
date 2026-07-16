@@ -1,0 +1,15 @@
+{
+  "name": "@saas-boilerplate/ai",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Flask AI worker service (Option C async jobs)",
+  "scripts": {
+    "dev:local": "sh ./scripts/run-python.sh -m app.entrypoint",
+    "start:local": "sh ./scripts/run-python.sh -m app.entrypoint",
+    "worker": "sh ./scripts/run-python.sh -m app.worker",
+    "test": "sh ./scripts/run-python.sh -c \"import pytest\" 2>/dev/null && sh ./scripts/run-python.sh -m pytest -q || echo 'Skipping AI pytest (install apps/ai/requirements-dev.txt)'",
+    "lint": "sh ./scripts/run-python.sh -c \"import ruff\" 2>/dev/null && sh ./scripts/run-python.sh -m ruff check app tests || echo 'Skipping AI ruff (install apps/ai/requirements-dev.txt)'",
+    "build": "node -e \"console.log('@saas-boilerplate/ai: python service — no compile step')\"",
+    "clean": "rm -rf .venv __pycache__ .pytest_cache .ruff_cache"
+  }
+}

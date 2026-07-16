@@ -18,22 +18,28 @@ flowchart LR
     end
 
     subgraph CD["On push to main/staging"]
-        Docker[Build Docker images]
+        Docker[Build API App AI images]
         Push[Push to GHCR]
         Docker --> Push
     end
 
     subgraph GitOps["ArgoCD"]
         Sync[Sync K8s manifests]
-        Rollout[Deploy pods]
         Migrate[Run migration Job]
+        Rollout[Deploy api app ai redis]
         Sync --> Migrate --> Rollout
     end
 
     Git[GitHub push] --> CI
     CI -->|passes| CD
     CD --> GitOps
-    Users[Users] --> Ingress[Ingress] --> Rollout
+    Users[Users] --> Ingress[Ingress]
+    Ingress --> AppPod[saas-app]
+    Ingress --> ApiPod[saas-api]
+    ApiPod --> RedisPod[saas-redis]
+    AiPod[saas-ai] --> RedisPod
+    ApiPod --> PG[(PostgreSQL)]
+    AiPod --> PG
 ```
 
 Workflow: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
@@ -41,7 +47,7 @@ Workflow: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
 | Job | Trigger | Steps |
 | --- | --- | --- |
 | **Lint, Test & Build** | Every push / PR to `main` or `staging` | `pnpm lint` → `pnpm test` → `pnpm build` |
-| **Publish Docker Images** | Push to `main` or `staging` (after CI passes) | Build & push API + App images to GHCR |
+| **Publish Docker Images** | Push to `main` or `staging` (after CI passes) | Build & push API + App + AI images to GHCR |
 
 ### Image tags pushed by CI
 
@@ -78,6 +84,9 @@ Images are published to GitHub Container Registry:
 | --- | --- |
 | `ghcr.io/khalil-bchir/saas-boilerplate-api` | `apps/api/Dockerfile` |
 | `ghcr.io/khalil-bchir/saas-boilerplate-app` | `apps/app/Dockerfile` |
+| `ghcr.io/khalil-bchir/saas-boilerplate-ai` | `apps/ai/Dockerfile` |
+
+Redis uses the public `redis:7.4-alpine` image via `deploy/k8s/base/redis/`.
 
 ### Build and push (staging)
 
@@ -85,8 +94,10 @@ Images are published to GitHub Container Registry:
 docker login ghcr.io -u Khalil-Bchir
 docker build -t ghcr.io/khalil-bchir/saas-boilerplate-api:staging -f apps/api/Dockerfile .
 docker build -t ghcr.io/khalil-bchir/saas-boilerplate-app:staging -f apps/app/Dockerfile .
+docker build -t ghcr.io/khalil-bchir/saas-boilerplate-ai:staging -f apps/ai/Dockerfile apps/ai
 docker push ghcr.io/khalil-bchir/saas-boilerplate-api:staging
 docker push ghcr.io/khalil-bchir/saas-boilerplate-app:staging
+docker push ghcr.io/khalil-bchir/saas-boilerplate-ai:staging
 ```
 
 ### Build and push (production)
@@ -94,8 +105,10 @@ docker push ghcr.io/khalil-bchir/saas-boilerplate-app:staging
 ```bash
 docker build -t ghcr.io/khalil-bchir/saas-boilerplate-api:production -f apps/api/Dockerfile .
 docker build -t ghcr.io/khalil-bchir/saas-boilerplate-app:production -f apps/app/Dockerfile .
+docker build -t ghcr.io/khalil-bchir/saas-boilerplate-ai:production -f apps/ai/Dockerfile apps/ai
 docker push ghcr.io/khalil-bchir/saas-boilerplate-api:production
 docker push ghcr.io/khalil-bchir/saas-boilerplate-app:production
+docker push ghcr.io/khalil-bchir/saas-boilerplate-ai:production
 ```
 
 ---

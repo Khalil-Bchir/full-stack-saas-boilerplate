@@ -41,7 +41,17 @@ yarn-error.log*
 
 .containers
 .ssh_keys
+
+# Legacy local compose filename (use compose.dev.yaml instead)
 docker-compose.yml
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+apps/ai/.venv/
 
 # .ssh_keys
 # local-meta

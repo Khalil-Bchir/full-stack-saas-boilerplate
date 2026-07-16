@@ -14,12 +14,18 @@ flowchart TD
     GHA --> Lint[lint]
     Lint --> Test[test]
     Test --> Build[build]
-    Build --> Images[build & push GHCR images]
+    Build --> Images[build & push API App AI images]
     Images --> Argo[ArgoCD detects manifest/image]
     Argo --> K8s[Kubernetes rollout]
     K8s --> Job[migration Job]
-    Job --> Pods[API + App pods]
+    Job --> Pods[api + app + ai + redis pods]
     Pods --> Ingress[Ingress]
+    Ingress --> App[saas-app]
+    Ingress --> API[saas-api]
+    API --> Redis[saas-redis]
+    AI[saas-ai] --> Redis
+    API --> PG[(PostgreSQL)]
+    AI --> PG
     Ingress --> Live[Live traffic]
 ```
 
@@ -37,6 +43,7 @@ On push to `main` or `staging` (after CI passes):
 
 4. Build & push `ghcr.io/khalil-bchir/saas-boilerplate-api`
 5. Build & push `ghcr.io/khalil-bchir/saas-boilerplate-app`
+6. Build & push `ghcr.io/khalil-bchir/saas-boilerplate-ai`
 
 ArgoCD then deploys the updated images to Kubernetes.
 
@@ -46,7 +53,7 @@ ArgoCD then deploys the updated images to Kubernetes.
 flowchart TB
     subgraph deploy
         subgraph k8s
-            Base[base/ api app ingress]
+            Base[base/ api app ai redis ingress]
             Staging[overlays/staging]
             Prod[overlays/production]
             Base --> Staging
@@ -65,7 +72,7 @@ flowchart TB
 ```
 deploy/
 ├── k8s/
-│   ├── base/                 Shared manifests (api, app, ingress, migration job)
+│   ├── base/                 Shared manifests (api, app, ai, redis, ingress, migration)
 │   └── overlays/
 │       ├── staging/          Namespace saas-staging
 │       └── production/       Namespace saas-production
@@ -83,6 +90,9 @@ deploy/
 | --- | --- | --- |
 | `ghcr.io/khalil-bchir/saas-boilerplate-api` | `staging` | `production` |
 | `ghcr.io/khalil-bchir/saas-boilerplate-app` | `staging` | `production` |
+| `ghcr.io/khalil-bchir/saas-boilerplate-ai` | `staging` | `production` |
+
+Redis runs from the public `redis:7.4-alpine` image (not built by CI).
 
 ## Quick start
 
@@ -95,8 +105,10 @@ pnpm build
 docker login ghcr.io -u Khalil-Bchir
 docker build -t ghcr.io/khalil-bchir/saas-boilerplate-api:staging -f apps/api/Dockerfile .
 docker build -t ghcr.io/khalil-bchir/saas-boilerplate-app:staging -f apps/app/Dockerfile .
+docker build -t ghcr.io/khalil-bchir/saas-boilerplate-ai:staging -f apps/ai/Dockerfile apps/ai
 docker push ghcr.io/khalil-bchir/saas-boilerplate-api:staging
 docker push ghcr.io/khalil-bchir/saas-boilerplate-app:staging
+docker push ghcr.io/khalil-bchir/saas-boilerplate-ai:staging
 ```
 
 ### 2. Create secrets

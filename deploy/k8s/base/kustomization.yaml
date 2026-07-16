@@ -5,6 +5,10 @@ namespace: saas-boilerplate
 
 resources:
   - namespace.yaml
+  - redis/deployment.yaml
+  - redis/service.yaml
+  - ai/deployment.yaml
+  - ai/service.yaml
   - api/deployment.yaml
   - api/service.yaml
   - api/migration-job.yaml
@@ -21,4 +25,7 @@ images:
     newTag: latest
   - name: saas-boilerplate-app
     newName: saas-boilerplate-app
+    newTag: latest
+  - name: saas-boilerplate-ai
+    newName: saas-boilerplate-ai
     newTag: latest

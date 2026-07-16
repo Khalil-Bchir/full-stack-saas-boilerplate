@@ -14,9 +14,20 @@ const routes: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       try {
         await prisma.$queryRaw`SELECT 1`;
 
+        let redis: 'up' | 'down' | 'disabled' = 'disabled';
+        if (fastify.redisClient) {
+          try {
+            const pong = await fastify.redisClient.ping();
+            redis = pong === 'PONG' ? 'up' : 'down';
+          } catch {
+            redis = 'down';
+          }
+        }
+
         return reply.status(200).send({
           status: 'ok',
           message: 'All systems operational',
+          redis,
         });
       } catch (err: any) {
         console.error(err);

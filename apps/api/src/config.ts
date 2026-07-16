@@ -45,4 +45,12 @@ export const config = {
    */
   accessTokenSecret: requiredVar('ACCESS_TOKEN_SECRET'),
   accessTokenTtl: requiredVar('ACCESS_TOKEN_TTL'),
+
+  /**
+   * Option C — async AI queue / cache
+   */
+  redisUrl: process.env.REDIS_URL ?? '',
+  aiStreamKey: process.env.AI_STREAM_KEY ?? 'ai:jobs',
+  aiConsumerGroup: process.env.AI_CONSUMER_GROUP ?? 'ai-workers',
+  aiCacheTtlSeconds: parseInt(process.env.AI_CACHE_TTL_SECONDS ?? '300', 10),
 };

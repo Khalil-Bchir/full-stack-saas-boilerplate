@@ -14,8 +14,13 @@ flowchart TD
     Schema -->|invalid| Error[400 Error]
     Service --> Prisma[fastify.prisma]
     Prisma --> DB[(PostgreSQL)]
+    Service -->|AI enqueue / cache| Redis[(Redis)]
+    Redis -->|XREADGROUP| AI["apps/ai Flask worker"]
+    AI --> DB
     Service --> Response[JSON Response]
 ```
+
+Product routes read/write Postgres directly. AI routes create durable `AiJob` rows and enqueue work on Redis; Flask workers update job status asynchronously. See [AI Async Jobs](./ai-async-jobs.md).
 
 ## Entry point
 
@@ -48,12 +53,13 @@ Plugins in `src/plugins/` register automatically:
 | Plugin | Purpose |
 | --- | --- |
 | `prisma` | Attach `fastify.prisma` client |
+| `redis` | Attach `fastify.redisClient` (queue + cache) |
 | `authorization` | JWT `verifyToken` decorator |
 | `cors` | Cross-origin requests |
 | `helmet` | Security headers |
 | `cookie` | Cookie parsing/signing |
 | `compress` | Response compression |
-| `rate-limit` | Request rate limiting |
+| `rate-limiter` | Request rate limiting (Redis-backed when available) |
 | `swagger` | OpenAPI documentation |
 | `i18next` | Internationalization |
 | `error-handler` | Global error formatting |
@@ -67,6 +73,7 @@ flowchart LR
     subgraph Files["src/routes/"]
         Auth[v1/auth/actions.ts]
         Users[v1/users/actions.ts]
+        AI[v1/ai/actions.ts]
         Admin[v1/admin/actions.ts]
         Health[v1/actions.ts]
         V2[v2/actions.ts]
@@ -75,6 +82,7 @@ flowchart LR
     subgraph URLs["/api prefix"]
         U1["/api/v1/auth/*"]
         U2["/api/v1/users/*"]
+        U6["/api/v1/ai/*"]
         U3["/api/v1/admin/*"]
         U4["/api/v1/health"]
         U5["/api/v2/*"]
@@ -82,6 +90,7 @@ flowchart LR
 
     Auth --> U1
     Users --> U2
+    AI --> U6
     Admin --> U3
     Health --> U4
     V2 --> U5
@@ -92,7 +101,10 @@ flowchart LR
 Files named `autohooks.ts` in route directories apply hooks to all routes in that folder:
 
 - `v1/users/autohooks.ts` — user route guards
+- `v1/ai/autohooks.ts` — JWT required for AI job routes
 - `v1/admin/autohooks.ts` — admin-only access
+
+Async AI job design is documented in [AI Async Jobs (Option C)](./ai-async-jobs.md).
 
 ## Adding a new route
 
